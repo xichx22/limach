@@ -49,10 +49,12 @@ Engine.register({
 
     var palette = ctx.el('div', 'palette');
     LineArt.COLORS.forEach(function (c) {
-      var sw = ctx.el('button', 'swatch');
+      var sw = ctx.el('button', 'swatch' + (c.light ? ' light' : ''));
       sw.type = 'button';
       sw.style.background = c.hex;
       sw.dataset.name = c.name;
+      sw.setAttribute('aria-label', c.name);
+      sw.innerHTML = '<span class="swatch-name">' + c.name + '</span>';
       sw.addEventListener('click', function () {
         color = c;
         Array.prototype.forEach.call(palette.children, function (x) { x.classList.remove('on'); });

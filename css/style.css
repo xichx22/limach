@@ -249,9 +249,22 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   word-break: keep-all; white-space:nowrap;
 }
 .balloon.wobble .balloon-body{ animation: wobble .5s ease; }
-.balloon.pop{ animation: pop-away .45s ease forwards; }
+/* 터질 때: 풍선은 제자리에 멈추고 몸통만 뻥 터진다.
+   (바깥쪽 animation 을 갈아끼우면 풍선이 바닥으로 되돌아간다) */
+.balloon.pop{ animation-play-state: paused; }
+.balloon.pop .balloon-body{ animation: pop-away .4s ease-out forwards; }
+.balloon.pop .balloon-name, .balloon.pop .balloon-string{ opacity:0; transition: opacity .15s; }
 .balloon.freeze{ animation-play-state: paused; }
 .balloon.freeze .balloon-body{ animation-play-state: paused; }
+
+.burst-bit{
+  position:absolute; width:14px; height:14px; border-radius:50%;
+  transform: translate(-50%, -50%);
+  animation: burst .6s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes burst{
+  to{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.25); opacity:0; }
+}
 
 @keyframes rise{
   from{ transform: translateY(12%); }
@@ -263,7 +276,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   25%{ transform: translateX(-10px) rotate(-8deg); }
   75%{ transform: translateX(10px) rotate(8deg); }
 }
-@keyframes pop-away{ to{ transform: scale(1.7); opacity:0; } }
+@keyframes pop-away{ 40%{ transform: scale(1.45); opacity:.85; } 100%{ transform: scale(1.9); opacity:0; } }
 
 /* ---------------- 🔦 손전등 ---------------- */
 .torch-stage{ position:relative; width:100%; display:flex; justify-content:center; }
@@ -322,14 +335,28 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 .paint .z.splash{ animation: splash .35s ease; }
 @keyframes splash{ 0%{ opacity:.35; } 100%{ opacity:1; } }
 .palette{
-  display:grid; grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-  gap:7px; width:100%; max-width:min(92vw, 560px);
+  display:grid; grid-template-columns: repeat(6, 1fr);
+  gap:6px; width:100%; max-width:min(94vw, 560px);
 }
 .swatch{
-  aspect-ratio:1; border-radius:14px; border:3px solid #fff;
+  position:relative; aspect-ratio:1; border-radius:14px; border:3px solid #fff;
   box-shadow: 0 3px 0 rgba(0,0,0,.14);
+  display:grid; place-items:end center; padding-bottom:3px;
 }
-.swatch.on{ outline:4px solid #ff8a3d; outline-offset:2px; transform: translateY(-3px); }
+/* 노랑·하늘·하양은 흰 테두리면 묻힌다 */
+.swatch.light{ border-color:#cfc6ba; }
+.swatch-name{
+  font-size:11px; color:#fff; text-shadow: 0 1px 2px rgba(0,0,0,.65);
+  pointer-events:none; line-height:1;
+}
+.swatch.light .swatch-name{ color:#5b4436; text-shadow:none; }
+/* 고른 색은 어두운 테두리 — 주황 테두리는 주황·노랑과 헷갈린다 */
+.swatch.on{ outline:4px solid #3b2a1f; outline-offset:2px; transform: translateY(-4px); }
+.swatch.on::after{
+  content:'✓'; position:absolute; top:-8px; right:-6px;
+  background:#3b2a1f; color:#fff; width:20px; height:20px; border-radius:50%;
+  font-size:13px; display:grid; place-items:center;
+}
 
 /* ---------------- 🎤 따라 말하기 ---------------- */
 .voice-card{
@@ -545,7 +572,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   .play-root.split .count-box.question{ width: min(40%, 380px); max-width:none; }
   .play-root.split .count-row{ grid-template-columns: repeat(2, 1fr); }
   .play-root.split .paint{ max-width: min(54%, 460px); }
-  .play-root.split .palette{ grid-template-columns: repeat(4, 1fr); width: min(34vw, 260px); }
+  .play-root.split .palette{ grid-template-columns: repeat(4, 1fr); width: min(36vw, 280px); }
   .play-root.split .voice-card{ width: min(32vw, 240px); }
   .play-root.split .voice-row{ grid-template-columns: repeat(2, 1fr); width: min(42vw, 320px); }
   .play-root.split .answer-side{ max-width: 46%; }

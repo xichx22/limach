@@ -28,7 +28,29 @@ Engine.register({
     var sky = ctx.el('div', 'sky');
     ctx.root.appendChild(sky);
 
+    var watch = null;
     var live = [];   // 지금 떠 있는 풍선들
+
+    /* 풍선이 터지면서 조각이 사방으로 튄다 */
+    function burst(node) {
+      var fx = document.getElementById('fx');
+      if (!fx) return;
+      var r = node.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height * 0.42;
+      var tint = node.style.getPropertyValue('--tint') || '#e8503a';
+      for (var i = 0; i < 12; i++) {
+        var bit = ctx.el('span', 'burst-bit');
+        var ang = (Math.PI * 2 / 12) * i + Math.random() * 0.5;
+        var dist = 55 + Math.random() * 80;
+        bit.style.left = cx + 'px';
+        bit.style.top = cy + 'px';
+        bit.style.background = tint;
+        bit.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+        bit.style.setProperty('--dy', (Math.sin(ang) * dist).toFixed(0) + 'px');
+        fx.appendChild(bit);
+        (function (n) { setTimeout(function () { n.remove(); }, 750); })(bit);
+      }
+    }
 
     function needTarget() {
       return !live.some(function (b) { return b.item.id === target.id; });
@@ -53,9 +75,18 @@ Engine.register({
         if (done) return;
         if (item.id === target.id) {
           done = true;
+          clearInterval(watch);
+          /* 터지는 풍선까지 멈추면 터지는 게 안 보인다. 나머지만 멈춘다. */
+          live.forEach(function (x) { if (x !== b) x.classList.add('freeze'); });
+          b.classList.remove('wobble');
           b.classList.add('pop');
-          live.forEach(function (x) { x.classList.add('freeze'); });
-          ctx.win(item);
+          Sound.pop();
+          burst(b);
+          /* 터지는 걸 보고 나서 칭찬 화면으로 넘어간다 */
+          timers.push(setTimeout(function () {
+            b.remove();
+            ctx.win(item);
+          }, 520));
         } else {
           /* 틀려도 혼내지 않는다. 풍선이 흔들리고 지나간다. */
           Sound.wrong();
@@ -83,7 +114,7 @@ Engine.register({
     }
 
     /* 목표가 오래 안 보이면 하나 더 띄워준다 */
-    var watch = setInterval(function () {
+    watch = setInterval(function () {
       if (done) return;
       if (needTarget()) spawn(target);
     }, 2500);

@@ -91,13 +91,21 @@
     }
   };
 
+  /* 앞 일곱 개는 무지개 순서 그대로 — 빨강 주황 노랑 초록 파랑 남색 보라.
+     light 는 흰 바탕에서 묻히는 색이라 테두리를 진하게 준다. */
   var COLORS = [
-    { name: '빨강', hex: '#e8453c' }, { name: '주황', hex: '#f5872b' },
-    { name: '노랑', hex: '#ffd23f' }, { name: '초록', hex: '#3fb950' },
-    { name: '하늘', hex: '#7fd8ff' }, { name: '파랑', hex: '#2f80ed' },
-    { name: '보라', hex: '#9b59d0' }, { name: '분홍', hex: '#ff86b5' },
-    { name: '갈색', hex: '#8b5a2b' }, { name: '까망', hex: '#3a3a3a' },
-    { name: '하양', hex: '#ffffff' }
+    { name: '빨강', hex: '#e8453c' },
+    { name: '주황', hex: '#f5872b' },
+    { name: '노랑', hex: '#ffd23f', light: true },
+    { name: '초록', hex: '#3fb950' },
+    { name: '파랑', hex: '#2f80ed' },
+    { name: '남색', hex: '#1f3a93' },
+    { name: '보라', hex: '#9b59d0' },
+    { name: '하늘', hex: '#7fd8ff', light: true },
+    { name: '분홍', hex: '#ff86b5' },
+    { name: '갈색', hex: '#8b5a2b' },
+    { name: '까망', hex: '#3a3a3a' },
+    { name: '하양', hex: '#ffffff', light: true }
   ];
 
   global.LineArt = { ART: ART, COLORS: COLORS };
