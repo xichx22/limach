@@ -36,7 +36,10 @@
     opts = opts || {};
     var n = el('button', 'tile' + (opts.cls ? ' ' + opts.cls : ''));
     n.type = 'button';
-    n.innerHTML = Art.html(item) + '<span class="tile-name">' + item.name + '</span>';
+    /* '백두대간협곡열차' 같은 긴 이름은 글씨를 줄여야 잘리지 않는다 */
+    var longName = (item.name || '').length >= 7 ? ' long' : '';
+    n.innerHTML = Art.html(item) +
+      '<span class="tile-name' + longName + '">' + item.name + '</span>';
     n.dataset.id = item.id;
     return n;
   }
@@ -85,7 +88,7 @@
       '<div class="banner-word">' + item.name + '</div>';
     banner.hidden = false;
     banner.classList.add('show');
-    setTimeout(function () { Sound.speak(item.name); }, 240);
+    setTimeout(function () { Sound.speak(spoken(item)); }, 240);
     setTimeout(function () {
       banner.classList.remove('show');
       setTimeout(function () { banner.hidden = true; if (done) done(); }, 260);
@@ -102,6 +105,10 @@
   }
 
   function say(text) { Sound.speak(text); }
+
+  /* 화면에 보이는 글자와 읽어주는 말이 다를 수 있다.
+     KTX 는 'KTX' 로 보여주고 '케이티엑스' 로 읽어야 한다. */
+  function spoken(item) { return (item && (item.say || item.name)) || ''; }
 
   /* ---------- 화면 틀 ---------- */
 
@@ -270,7 +277,7 @@
       },
       next: function () { next(); },
       el: el, tile: tile, gridCols: gridCols, grid: makeGrid, shuffle: shuffle, pick: pick, one: one,
-      confetti: confetti, say: say
+      confetti: confetti, say: say, spoken: spoken
     };
 
     function next() {

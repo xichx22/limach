@@ -17,6 +17,8 @@ Engine.register({
 
     ctx.ask('어디 있어?', target.name);
 
+    var said = ctx.spoken(target);
+
     var bar = ctx.el('div', 'tool-bar');
     var again = ctx.el('button', 'tool-btn', '🔊 다시 들려줘');
     again.type = 'button';
@@ -35,13 +37,13 @@ Engine.register({
           ctx.win(it);
         } else {
           ctx.lose(t);
-          setTimeout(function () { ctx.say(target.name + ' 찾아봐'); }, 620);
+          setTimeout(function () { ctx.say(said + ' 찾아봐'); }, 620);
         }
       });
       grid.appendChild(t);
     });
 
     ctx.root.appendChild(grid);
-    setTimeout(function () { ctx.say(target.name + ', 어디 있어?'); }, 250);
+    setTimeout(function () { ctx.say(said + ', 어디 있어?'); }, 250);
   }
 });

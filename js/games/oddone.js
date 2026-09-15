@@ -42,7 +42,7 @@ Engine.register({
         if (answered) return;
         if (it.id === odd.id) {
           answered = true;
-          setTimeout(function () { ctx.say(odd.name + '만 달라요'); }, 900);
+          setTimeout(function () { ctx.say(ctx.spoken(odd) + '만 달라요'); }, 900);
           ctx.win(it);
         } else {
           ctx.lose(t);

@@ -6,7 +6,7 @@
 > 앱의 `내 사진` 기능으로 직접 넣은 사진은 이 목록에 없다.
 > 그 사진들은 기기 안에만 저장되고 저장소에 올라가지 않는다.
 
-사진 60장
+사진 82장
 
 | 사진 | 원저작자 | 라이선스 | 원본 |
 |---|---|---|---|
@@ -70,3 +70,25 @@
 | 크레인 | © 2010 K. Krallis, SV1XV | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:20100225-Liebherr_LTM_1200-5.jpg) |
 | 탱크로리 | 溜池五郎 | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Tank_truck%E3%82%BF%E3%83%B3%E3%82%AF%E3%83%AD%E3%83%BC%E3%83%AA%E3%83%BC9274341.jpg) |
 | 트랙터 | Mulad | CC BY 2.0 | [원본](https://commons.wikimedia.org/wiki/File:Ford_8N.jpg) |
+| ITX-마음 | Sunrise seto | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:ITXMAUM.jpg) |
+| ITX-새마을 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:ITX-Saemaeul.jpg) |
+| ITX-청춘 | 충북선 무궁화호 | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:KORAIL_ITX_36806.jpg) |
+| KTX | Takeshi Aida from Hong Kong, Hong Kong | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:Korail_KTX-Eum,_Yongsan_(20240404)_(54220932565).jpg) |
+| KTX-산천 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:KTX-Sancheon.jpg) |
+| KTX-이음 | Rsa | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:KTX-Eum_517_Jeongdongjin_Station_20230430.jpg) |
+| SRT | Hajoon0102 | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:SRT_Class_120000.jpg) |
+| 경전철 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Uijeongbu_ULine_VAL208.jpg) |
+| 남도해양열차 | 인생살이 | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:S-TRAIN.JPG) |
+| 누리로 | 알 수 없음 | 출처 표기 필요 | [원본](https://commons.wikimedia.org/wiki/File:Nooriro.jpg) |
+| 모노레일 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Daegu_Metro_Line_3.jpg) |
+| 무궁화호 | 부총리 | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:8200%ED%98%B8%EB%8C%80_%EB%AC%B4%EA%B6%81%ED%99%94%ED%98%B82.jpg) |
+| 백두대간협곡열차 | acrofan | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Front_of_V-train.JPG) |
+| 부산지하철 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Busan_Metro_EMU_Class_4000.jpg) |
+| 새마을호 | Subway06 | CC BY 3.0 | [원본](https://commons.wikimedia.org/wiki/File:PP-DHC.jpg) |
+| 서해금빛열차 | Republic of  Korea from Seoul, Republic of Korea | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:West_Gold_Train_09.jpg) |
+| 자기부상열차 | Minseong Kim | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Incheon_Airport_Maglev_1-04.jpg) |
+| 전기기관차 | Subway06 | CC BY 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Korail_8243.jpg) |
+| 정선아리랑열차 | Jeon Han, Korea.net | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:A-Train_(Korail),_Jeongseon_Arirang_Train,_2015.jpg) |
+| 증기기관차 | 04_15_09_162xp_-_Flickr_-_drewj1946.jpg: Drew  Jacksich from San Jose, | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:Union_Pacific_844,_Painted_Rocks,_NV,_2009_(crop).jpg) |
+| 지하철 | Mtattrain | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Seoul_Metro_Line_2_train_arriving_at_Guro_Digital_Complex_(2-09).jpg) |
+| 트램 | Mateusz Kempisty | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Pesa_120N_3113,_tram_line_9,_Warsaw,_2009.jpg) |

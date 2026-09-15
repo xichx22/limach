@@ -105,7 +105,7 @@ Engine.register({
     build();
     var onResize = function () { if (!solved) build(); };
     window.addEventListener('resize', onResize);
-    setTimeout(function () { ctx.say(subject.name + ' 그림을 맞춰봐'); }, 250);
+    setTimeout(function () { ctx.say(ctx.spoken(subject) + ' 그림을 맞춰봐'); }, 250);
     return function () { window.removeEventListener('resize', onResize); };
   }
 });

@@ -44,10 +44,37 @@
         { id: 'van',        name: '승합차' },
         { id: 'moto',       name: '오토바이' },
         { id: 'bike',       name: '자전거' },
-        { id: 'train',      name: '기차' },
         { id: 'plane',      name: '비행기' },
         { id: 'helicopter', name: '헬리콥터' },
         { id: 'ship',       name: '배' }
+      ]
+    }),
+    withPhotos({
+      id: 'train', name: '기차', icon: '🚄', color: '#4f46e5', sibling: 'car',
+      /* say 는 읽어줄 말. KTX 는 'KTX' 로 보여주고 '케이티엑스' 로 읽어야 한다. */
+      items: [
+        { id: 'ktx',           name: 'KTX',            say: '케이티엑스' },
+        { id: 'ktxsancheon',   name: 'KTX-산천',        say: '케이티엑스 산천' },
+        { id: 'ktxeum',        name: 'KTX-이음',        say: '케이티엑스 이음' },
+        { id: 'srt',           name: 'SRT',            say: '에스알티' },
+        { id: 'itxsaemaeul',   name: 'ITX-새마을',      say: '아이티엑스 새마을' },
+        { id: 'itxcheongchun', name: 'ITX-청춘',        say: '아이티엑스 청춘' },
+        { id: 'itxmaeum',      name: 'ITX-마음',        say: '아이티엑스 마음' },
+        { id: 'mugunghwa',     name: '무궁화호' },
+        { id: 'saemaeul',      name: '새마을호' },
+        { id: 'nuriro',        name: '누리로' },
+        { id: 'subway',        name: '지하철' },
+        { id: 'busansubway',   name: '부산지하철' },
+        { id: 'monorail',      name: '모노레일' },
+        { id: 'lightrail',     name: '경전철' },
+        { id: 'maglev',        name: '자기부상열차' },
+        { id: 'tram',          name: '트램' },
+        { id: 'steam',         name: '증기기관차' },
+        { id: 'electricloco',  name: '전기기관차' },
+        { id: 'goldtrain',     name: '서해금빛열차' },
+        { id: 'arirangtrain',  name: '정선아리랑열차' },
+        { id: 'seatrain',      name: '남도해양열차' },
+        { id: 'valleytrain',   name: '백두대간협곡열차' }
       ]
     }),
     withPhotos({
