@@ -422,31 +422,58 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 .photo-name{ flex:1; font-size:18px; }
 .photo-del{ width:44px; height:44px; border-radius:50%; background:#ffe9e6; color:#d33; font-size:20px; }
 
-/* ---------------- 퍼즐 ---------------- */
+/* ---------------- 🧩 퍼즐 (진짜 퍼즐처럼 끼우기) ---------------- */
 .puzzle-preview{ display:flex; align-items:center; gap:10px; }
 .preview-box{
-  width:96px; height:96px; border-radius:12px; overflow:hidden;
+  width:84px; height:84px; border-radius:12px; overflow:hidden;
   box-shadow: 0 0 0 3px #fff, 0 4px 10px rgba(0,0,0,.18);
 }
 .preview-box img{ width:100%; height:100%; object-fit:cover; display:block; }
-.preview-name{ font-size:20px; color:#5b4436; word-break: keep-all; overflow-wrap: anywhere; }
+.preview-name{ font-size:19px; color:#5b4436; word-break: keep-all; overflow-wrap: anywhere; }
 
+.jig-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
 
-.puzzle-board{
-  --n: 4;
-  display:grid;
-  grid-template-columns: repeat(var(--n), 1fr);
-  grid-template-rows: repeat(var(--n), 1fr);
-  gap:2px; background:#fff; padding:2px; border-radius:14px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+.jig-board{
+  position:relative; background:#fff; border-radius:12px;
+  box-shadow: inset 0 0 0 3px #e4ddd2, 0 6px 18px rgba(0,0,0,.16);
 }
-.piece{
-  position:relative; overflow:hidden; border-radius:4px;
-  padding:0; background:#eee no-repeat;
+/* 완성 그림을 아주 옅게 깔아준다 — 어디에 뭐가 들어가는지 보여야 포기하지 않는다 */
+.jig-ghost{
+  position:absolute; inset:0; border-radius:10px;
+  background-size:100% 100%; opacity:.17; filter: grayscale(.35);
 }
-.piece.sel{ outline: 4px solid #ff7043; outline-offset: -4px; z-index:2; transform: scale(1.06); }
-.puzzle-board.solved{ box-shadow: 0 0 0 5px #48c774, 0 6px 18px rgba(0,0,0,.18); }
-.puzzle-board.solved .piece{ border-radius:0; }
+.jig-slot{
+  position:absolute; box-sizing:border-box;
+  border:1px dashed rgba(120,100,80,.35); border-radius:4px;
+}
+.jig-slot.done{ border-color: transparent; }
+.jig-slot.nope{ background: rgba(232,80,58,.22); }
+.jig-fixed{
+  position:absolute; background-repeat:no-repeat; pointer-events:none;
+  animation: snap .3s ease;
+}
+@keyframes snap{ 0%{ transform: scale(1.14); } 100%{ transform: scale(1); } }
+
+.jig-tray{
+  display:flex; flex-wrap:wrap; justify-content:center; align-content:center;
+  gap:6px; padding:8px; width:100%;
+  background:#fff7e8; border-radius:18px; box-shadow: inset 0 2px 8px rgba(0,0,0,.08);
+}
+.jpiece{
+  background-repeat:no-repeat; padding:0; touch-action:none;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,.35));
+  transition: transform .12s ease;
+}
+.jpiece.sel{ transform: scale(1.1); filter: drop-shadow(0 0 0 #ff7043) drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+.jpiece.lifted{ opacity:.3; }
+.jpiece.flying{
+  position:fixed; z-index:120; pointer-events:none;
+  transform: translate(-50%, -50%) scale(1.12);
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,.45));
+}
+.jig-board.solved{ box-shadow: 0 0 0 5px #48c774, 0 6px 18px rgba(0,0,0,.16); }
+.jig-board.solved .jig-slot{ border-color: transparent; }
+.jig-board.solved .jig-ghost{ opacity:0; }
 
 /* ---------------- 칭찬 배너 ---------------- */
 .banner{
@@ -533,6 +560,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   .zoom-box{ width: min(42vw, 300px); }
   .where-subject{ width: min(30vw, 230px); }
   .puzzle-preview{ gap:14px; }
+  .play-root.split .jig-tray{ width: min(36vw, 300px); max-height: 78vh; overflow-y:auto; }
 }
 
 /* 가로모드인데 세로가 아주 짧으면(폰을 눕힌 경우) 머리말을 납작하게 */

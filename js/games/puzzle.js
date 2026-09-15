@@ -1,21 +1,27 @@
-/* 🧩 퍼즐 — 사진 한 장을 조각내서 섞는다. 조각 두 개를 차례로 눌러 자리를 바꾼다.
-   드래그가 없어서 작은 손으로도 정확하게 다룰 수 있다.
-   4x4(16조각)부터 6x6(36조각)까지 올라간다. */
+/* 🧩 퍼즐 — 진짜 퍼즐처럼 만든다.
+   빈 판이 있고, 조각은 아래(또는 옆) 쟁반에 흩어져 있다.
+   조각을 끌어다 제자리에 놓으면 딸깍 들어간다. 끌기가 어려우면 눌렀다 놓는 것도 된다.
+   조각마다 돌기와 홈이 있어서 서로 맞물린다. */
 Engine.register({
   id: 'puzzle',
   name: '퍼즐',
   icon: '🧩',
-  levels: 3,
+  levels: 4,
   upAfter: 1,
-  downAfter: 999,
+  downAfter: 2,
 
   round: function (ctx) {
-    var sizes = [4, 5, 6];
+    var sizes = [3, 4, 5, 6];
     var N = sizes[ctx.level()];
     var total = N * N;
 
-    /* 사진이 있는 것만 퍼즐로 쓸 수 있다 */
-    var usable = ctx.theme.items.filter(function (i) { return !!Art.src(i); });
+    /* 조각마다 단서가 있는 사진만 쓴다 */
+    var usable = ctx.theme.items.filter(function (i) {
+      if (!Art.src(i)) return false;
+      if (ctx.theme.custom) return true;
+      return !window.PuzzleOk || PuzzleOk[ctx.theme.id + '_' + i.id];
+    });
+    if (!usable.length) usable = ctx.theme.items.filter(function (i) { return !!Art.src(i); });
     if (!usable.length) {
       ctx.root.appendChild(ctx.el('div', 'notice', '이 주제엔 아직 사진이 없어요.'));
       return;
@@ -23,94 +29,259 @@ Engine.register({
     var subject = ctx.one(usable);
     var photo = Art.src(subject);
 
-    var order = [];
-    for (var i = 0; i < total; i++) order.push(i);
-    do { order = ctx.shuffle(order); } while (isSolved());
+    /* 맞물리는 모서리 — 이웃한 두 조각이 같은 곡선을 나눠 갖는다 */
+    var H = [], V = [];
+    for (var r = 0; r < N; r++) {
+      H[r] = []; V[r] = [];
+      for (var c = 0; c < N; c++) {
+        H[r][c] = Math.random() < 0.5 ? 1 : -1;   // (r,c) 와 (r,c+1) 사이
+        V[r][c] = Math.random() < 0.5 ? 1 : -1;   // (r,c) 와 (r+1,c) 사이
+      }
+    }
 
-    var selected = -1, solved = false;
-
-    ctx.ask('그림을 맞춰봐!', subject.name);
-
-    /* 완성 그림 미리보기 — 무엇을 만드는지 알아야 맞출 수 있다 */
     ctx.root.classList.add('split');
+    ctx.ask('끼워봐!', subject.name);
 
     var preview = ctx.el('div', 'puzzle-preview');
     preview.innerHTML = '<div class="preview-box"><img src="' + photo + '" alt=""></div>' +
                         '<div class="preview-name">' + subject.name + '</div>';
-    ctx.root.appendChild(preview);
 
-    var board = ctx.el('div', 'puzzle-board');
-    board.style.setProperty('--n', N);
-    ctx.root.appendChild(board);
+    var boardWrap = ctx.el('div', 'jig-wrap');
+    var board = ctx.el('div', 'jig-board');
+    boardWrap.appendChild(preview);
+    boardWrap.appendChild(board);
+    ctx.root.appendChild(boardWrap);
 
-    var pieces = [], boardPx = 0;
+    var tray = ctx.el('div', 'jig-tray');
+    ctx.root.appendChild(tray);
 
-    function isSolved() {
-      for (var k = 0; k < order.length; k++) if (order[k] !== k) return false;
-      return true;
+    var cell = 0, tab = 0, boardPx = 0, trayCell = 0;
+    var placed = {};                 // 자리에 들어간 조각
+    var pool = ctx.shuffle((function () {
+      var a = []; for (var i = 0; i < total; i++) a.push(i); return a;
+    })());
+    var trayMax = 6;
+    var solved = false;
+
+    /* 한 변을 그린다. s 가 0 이면 곧은 선, 아니면 돌기/홈이 생긴다. */
+    function side(x, y, dx, dy, len, s) {
+      var p = '';
+      var nx = dy, ny = -dx;                      // 바깥쪽 방향
+      if (!s) return 'L' + (x + dx * len) + ' ' + (y + dy * len);
+      var a = 0.4, b = 0.6, rr = (0.118 * len).toFixed(2);
+      p += 'L' + (x + dx * len * a) + ' ' + (y + dy * len * a);
+      p += 'A' + rr + ' ' + rr + ' 0 1 ' + (s > 0 ? 1 : 0) + ' ' +
+           (x + dx * len * b) + ' ' + (y + dy * len * b);
+      p += 'L' + (x + dx * len) + ' ' + (y + dy * len);
+      /* nx, ny 는 호의 방향(sweep)으로 이미 반영된다 */
+      return p;
     }
 
-    function paint(pos) {
-      var cell = boardPx / N, k = order[pos];
-      pieces[pos].style.backgroundPosition =
-        (-(k % N) * cell) + 'px ' + (-Math.floor(k / N) * cell) + 'px';
+    function pathFor(r, c, e, t) {
+      var x0 = t, y0 = t;
+      var d = 'M' + x0 + ' ' + y0;
+      d += side(x0, y0, 1, 0, e, r > 0 ? -V[r - 1][c] : 0);              // 위
+      d += side(x0 + e, y0, 0, 1, e, c < N - 1 ? H[r][c] : 0);           // 오른쪽
+      d += side(x0 + e, y0 + e, -1, 0, e, r < N - 1 ? V[r][c] : 0);      // 아래
+      d += side(x0, y0 + e, 0, -1, e, c > 0 ? -H[r][c - 1] : 0);         // 왼쪽
+      return d + 'Z';
     }
 
-    function build() {
+    function stylePiece(node, idx, e) {
+      e = e || cell;
+      var t = Math.round(e * 0.2);
+      var r = Math.floor(idx / N), c = idx % N;
+      node.style.width = (e + t * 2) + 'px';
+      node.style.height = (e + t * 2) + 'px';
+      node.style.backgroundImage = 'url("' + photo + '")';
+      node.style.backgroundSize = (e * N) + 'px ' + (e * N) + 'px';
+      node.style.backgroundPosition = (-(c * e - t)) + 'px ' + (-(r * e - t)) + 'px';
+      var d = pathFor(r, c, e, t);
+      node.style.clipPath = 'path("' + d + '")';
+      node.style.webkitClipPath = 'path("' + d + '")';
+    }
+
+    function sizes2() {
       var d = document.documentElement;
       var land = d.clientWidth > d.clientHeight;
-      /* 가로모드에선 미리보기가 옆에 있으니 세로를 거의 다 쓴다 */
-      boardPx = Math.floor(Math.min(
-        d.clientWidth * (land ? 0.62 : 0.94),
-        d.clientHeight - (land ? 150 : 215)
-      ) / N) * N;
-      if (boardPx < N * 34) boardPx = N * 34;
 
-      board.style.width = boardPx + 'px';
-      board.style.height = boardPx + 'px';
-      board.innerHTML = '';
-      pieces = [];
+      /* 쟁반 크기를 먼저 정한다. 그래야 판에 줄 높이가 얼마인지 알 수 있다. */
+      var perRow = land ? 2 : 4;
+      var trayW = land ? Math.min(d.clientWidth * 0.34, 300) : d.clientWidth * 0.94;
+      trayCell = Math.max(38, Math.min(110, Math.floor((trayW - 20) / perRow) - 12));
+      trayMax = land ? 8 : 8;
+      var trayRows = Math.ceil(trayMax / perRow);
+      var trayH = trayRows * (trayCell * 1.4 + 8) + 18;
 
-      for (var pos = 0; pos < total; pos++) {
-        (function (pos) {
-          var c = ctx.el('button', 'piece');
-          c.type = 'button';
-          c.style.backgroundImage = 'url("' + photo + '")';
-          c.style.backgroundSize = boardPx + 'px ' + boardPx + 'px';
-          c.addEventListener('click', function () { tap(pos); });
-          board.appendChild(c);
-          pieces[pos] = c;
-        })(pos);
-      }
-      for (var p = 0; p < total; p++) paint(p);
+      var headH = land ? 72 : 92;
+      var previewH = land ? 0 : 104;
+      var availW = land ? d.clientWidth * 0.56 : d.clientWidth * 0.95;
+      var availH = d.clientHeight - headH - previewH - (land ? 12 : trayH + 14);
+
+      boardPx = Math.floor(Math.min(availW, availH) / N) * N;
+      if (boardPx < N * 46) boardPx = N * 46;
+      cell = boardPx / N;
+      tab = Math.round(cell * 0.2);
+      if (trayCell > cell) trayCell = Math.floor(cell);
     }
 
-    function tap(pos) {
-      if (solved) return;
-      if (selected === -1) {
-        selected = pos; pieces[pos].classList.add('sel'); Sound.pop(); return;
-      }
-      if (selected === pos) {
-        pieces[pos].classList.remove('sel'); selected = -1; return;
-      }
-      var a = selected, b = pos;
-      pieces[a].classList.remove('sel');
-      selected = -1;
-      var t = order[a]; order[a] = order[b]; order[b] = t;
-      paint(a); paint(b);
-      Sound.pop();
+    function buildBoard() {
+      board.innerHTML = '';
+      board.style.width = boardPx + 'px';
+      board.style.height = boardPx + 'px';
+      board.style.setProperty('--n', N);
 
-      if (isSolved()) {
-        solved = true;
-        board.classList.add('solved');
-        setTimeout(function () { ctx.win(subject); }, 600);
+      var ghost = ctx.el('div', 'jig-ghost');
+      ghost.style.backgroundImage = 'url("' + photo + '")';
+      board.appendChild(ghost);
+
+      for (var i = 0; i < total; i++) {
+        (function (i) {
+          var r = Math.floor(i / N), c = i % N;
+          var slot = ctx.el('div', 'jig-slot');
+          slot.dataset.slot = i;
+          slot.style.left = (c * cell) + 'px';
+          slot.style.top = (r * cell) + 'px';
+          slot.style.width = cell + 'px';
+          slot.style.height = cell + 'px';
+          slot.addEventListener('click', function () { tryPlace(i); });
+          board.appendChild(slot);
+        })(i);
       }
+      /* 이미 놓은 조각 다시 그리기 */
+      Object.keys(placed).forEach(function (k) { drawPlaced(+k); });
+    }
+
+    function drawPlaced(idx) {
+      var r = Math.floor(idx / N), c = idx % N;
+      var node = ctx.el('div', 'jig-fixed');
+      node.style.left = (c * cell - tab) + 'px';
+      node.style.top = (r * cell - tab) + 'px';
+      stylePiece(node, idx);
+      board.appendChild(node);
+    }
+
+    var selected = -1;
+
+    function fillTray() {
+      tray.innerHTML = '';
+      var shown = pool.slice(0, trayMax);
+      shown.forEach(function (idx) {
+        var pc = ctx.el('button', 'jpiece');
+        pc.type = 'button';
+        pc.dataset.idx = idx;
+        stylePiece(pc, idx, trayCell);
+        if (idx === selected) pc.classList.add('sel');
+        attachDrag(pc, idx);
+        tray.appendChild(pc);
+      });
+      if (!pool.length && !solved) finish();
+    }
+
+    function tryPlace(slotIdx) {
+      if (solved || selected < 0) return;
+      if (slotIdx !== selected) {
+        /* 자리가 아니면 들어가지 않는다 — 진짜 퍼즐처럼 */
+        var s = board.querySelector('[data-slot="' + slotIdx + '"]');
+        if (s) { s.classList.add('nope'); setTimeout(function () { s.classList.remove('nope'); }, 400); }
+        Sound.wrong();
+        return;
+      }
+      accept(selected);
+    }
+
+    function accept(idx) {
+      var i = pool.indexOf(idx);
+      if (i >= 0) pool.splice(i, 1);
+      placed[idx] = true;
+      selected = -1;
+      drawPlaced(idx);
+      var slot = board.querySelector('[data-slot="' + idx + '"]');
+      if (slot) slot.classList.add('done');
+      Sound.pop();
+      fillTray();
+    }
+
+    function finish() {
+      solved = true;
+      board.classList.add('solved');
+      setTimeout(function () { ctx.win(subject); }, 600);
+    }
+
+    /* 끌어서 옮기기 — 못 하면 눌렀다 놓기로도 된다 */
+    function attachDrag(node, idx) {
+      var ghostEl = null, moved = false, startX = 0, startY = 0;
+
+      function down(e) {
+        if (solved) return;
+        e.preventDefault();
+        moved = false;
+        startX = e.clientX; startY = e.clientY;
+        selected = idx;
+        Array.prototype.forEach.call(tray.children, function (x) { x.classList.remove('sel'); });
+        node.classList.add('sel');
+        node.setPointerCapture && node.setPointerCapture(e.pointerId);
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', up);
+      }
+      function move(e) {
+        if (!moved && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) < 8) return;
+        if (!moved) {
+          moved = true;
+          ghostEl = node.cloneNode(true);
+          ghostEl.className = 'jpiece flying';
+          document.body.appendChild(ghostEl);
+          node.classList.add('lifted');
+        }
+        ghostEl.style.left = e.clientX + 'px';
+        ghostEl.style.top = e.clientY + 'px';
+      }
+      function up(e) {
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        node.classList.remove('lifted');
+        if (ghostEl) { ghostEl.remove(); ghostEl = null; }
+        if (!moved) return;                    // 그냥 눌렀다 뗀 것 = 고르기
+        var el = document.elementFromPoint(e.clientX, e.clientY);
+        var slot = el && el.closest && el.closest('.jig-slot');
+        if (slot) tryPlace(+slot.dataset.slot);
+      }
+      node.addEventListener('pointerdown', down);
+    }
+
+    /* 머리말·미리보기 높이는 글자 길이에 따라 달라져서 미리 계산하기 어렵다.
+       한 번 그려보고 넘친 만큼 판을 줄인다. */
+    var adjusted = false;
+    function build() {
+      sizes2();
+      buildBoard();
+      fillTray();
+      requestAnimationFrame(function () {
+        if (adjusted || solved) return;
+        var d = document.documentElement;
+        var over = d.scrollHeight - d.clientHeight;
+        if (over <= 2) return;
+        adjusted = true;
+        boardPx = Math.max(N * 46, Math.floor((boardPx - over - 10) / N) * N);
+        cell = boardPx / N;
+        tab = Math.round(cell * 0.2);
+        if (trayCell > cell) trayCell = Math.floor(cell);
+        buildBoard();
+        fillTray();
+      });
     }
 
     build();
-    var onResize = function () { if (!solved) build(); };
+    var onResize = function () { if (!solved) { adjusted = false; build(); } };
     window.addEventListener('resize', onResize);
-    setTimeout(function () { ctx.say(ctx.spoken(subject) + ' 그림을 맞춰봐'); }, 250);
-    return function () { window.removeEventListener('resize', onResize); };
+    setTimeout(function () {
+      ctx.say(ctx.spoken(subject) + ' 퍼즐이야. 조각을 끼워봐');
+    }, 250);
+
+    return function () {
+      window.removeEventListener('resize', onResize);
+      var f = document.querySelector('.jpiece.flying');
+      if (f) f.remove();
+    };
   }
 });
