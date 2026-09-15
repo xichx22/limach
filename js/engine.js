@@ -656,7 +656,7 @@
           return;
         }
         var url = cut(Math.floor(i / n.cols), i % n.cols, n, 480);
-        Mine.add(nm[i], url).then(function () {
+        Mine.add(nm[i], url, { from: 'sheet' }).then(function () {
           i++;
           btn.textContent = '넣는 중… ' + i + '/' + nm.length;
           setTimeout(step, 0);
@@ -690,7 +690,7 @@
       Sound.pop();
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
-      Mine.load().then(home, home);
+      Mine.load().then(function () { Mine.ensureScores(); home(); }, home);
       if (!Sound.canSpeakKorean()) {
         setTimeout(function () {
           var w = el('div', 'novoice', '🔇 이 기기에 한국어 음성이 없어요.<br>글자로만 나와요.');

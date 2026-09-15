@@ -39,12 +39,74 @@
 
   function all() { return cache; }
 
-  function add(name, dataUrl) {
+  function add(name, dataUrl, meta) {
     var item = { id: 'my' + Date.now() + Math.floor(Math.random() * 999),
                  name: name, src: dataUrl, at: Date.now() };
-    return tx('readwrite', function (s) { return s.put(item); }).then(function () {
+    if (meta) for (var k in meta) item[k] = meta[k];
+    return detail(dataUrl).then(function (score) {
+      item.score = score;
+      return tx('readwrite', function (s) { return s.put(item); });
+    }).then(function () {
       cache.push(item); return item;
     });
+  }
+
+  /* 사진을 6x6 으로 잘랐을 때 '단색 조각'이 얼마나 나오는지 잰다.
+     흰 여백이 많은 사진(도감을 잘라 넣은 카드 같은)은 퍼즐로 쓸 수 없다.
+     조각에 아무 단서가 없으면 맞출 방법이 없기 때문이다. */
+  function detail(dataUrl) {
+    return new Promise(function (done) {
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var S = 192, N = 6, cell = S / N;
+          var c = document.createElement('canvas');
+          c.width = c.height = S;
+          var g = c.getContext('2d');
+          g.drawImage(img, 0, 0, S, S);
+          var d = g.getImageData(0, 0, S, S).data;
+          var flat = 0;
+          for (var ry = 0; ry < N; ry++) {
+            for (var rx = 0; rx < N; rx++) {
+              var sum = 0, sq = 0, n = 0;
+              for (var y = ry * cell; y < (ry + 1) * cell; y += 2) {
+                for (var x = rx * cell; x < (rx + 1) * cell; x += 2) {
+                  var i = ((y | 0) * S + (x | 0)) * 4;
+                  var L = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                  sum += L; sq += L * L; n++;
+                }
+              }
+              var m = sum / n;
+              if (Math.sqrt(Math.max(0, sq / n - m * m)) < 16) flat++;
+            }
+          }
+          done(flat / (N * N));
+        } catch (e) { done(0); }
+      };
+      img.onerror = function () { done(0); };
+      img.src = dataUrl;
+    });
+  }
+
+  /* 예전에 넣어둔 사진에는 점수가 없다. 한 번 재서 저장해 둔다. */
+  function ensureScores() {
+    var todo = cache.filter(function (x) { return typeof x.score !== 'number'; });
+    if (!todo.length) return Promise.resolve();
+    return todo.reduce(function (chain, it) {
+      return chain.then(function () {
+        return detail(it.src).then(function (sc) {
+          it.score = sc;
+          return tx('readwrite', function (s) { return s.put(it); });
+        });
+      });
+    }, Promise.resolve());
+  }
+
+  /* 퍼즐로 쓸 만한 사진인지 */
+  function puzzleOk(item) {
+    if (item.from === 'sheet') return false;                 // 도감을 잘라 넣은 것
+    if (typeof item.score === 'number' && item.score > 0.12) return false;
+    return true;
   }
 
   function remove(id) {
@@ -74,5 +136,6 @@
     });
   }
 
-  global.Mine = { load: load, all: all, add: add, remove: remove, shrink: shrink };
+  global.Mine = { load: load, all: all, add: add, remove: remove, shrink: shrink,
+                  ensureScores: ensureScores, puzzleOk: puzzleOk };
 })(window);

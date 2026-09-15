@@ -27,14 +27,26 @@ Engine.register({
     /* 조각마다 단서가 있는 사진만 쓴다 */
     var usable = ctx.theme.items.filter(function (i) {
       if (!Art.src(i)) return false;
-      if (ctx.theme.custom) return true;
+      /* 내 사진도 조각에 단서가 있는 것만 고른다.
+         도감을 잘라 넣은 카드는 흰 여백이 많아 퍼즐이 되지 않는다.
+         (🧩 로 직접 고른 사진은 부모가 정한 것이니 그대로 쓴다) */
+      if (ctx.theme.custom) return !window.Mine || Mine.puzzleOk(i);
       return !window.PuzzleOk || PuzzleOk[ctx.theme.id + '_' + i.id];
     });
-    if (!usable.length) usable = ctx.theme.items.filter(function (i) { return !!Art.src(i); });
+    /* 저장소 주제는 쓸 만한 게 하나도 없으면 그냥 아무거나 쓴다.
+       내 사진은 그러면 안 된다 — 도감을 잘라 넣은 카드만 잔뜩인 경우가 있다. */
+    if (!usable.length && !ctx.theme.custom) {
+      usable = ctx.theme.items.filter(function (i) { return !!Art.src(i); });
+    }
+    var hasAny = ctx.theme.items.some(function (i) { return !!Art.src(i); });
     if (!subject) {
       if (!usable.length) {
         ctx.root.appendChild(ctx.el('div', 'notice',
-          '이 주제엔 아직 사진이 없어요.<br>아래 📷 로 사진을 골라도 돼요.'));
+          hasAny
+            ? '넣어둔 사진은 퍼즐로 만들기 어려워요.<br>' +
+              '(잘라 넣은 카드처럼 빈 곳이 많으면 조각에 단서가 없어요)<br>' +
+              '아래 📷 로 다른 사진을 골라보세요.'
+            : '이 주제엔 아직 사진이 없어요.<br>아래 📷 로 사진을 골라도 돼요.'));
       } else {
         subject = ctx.one(usable);
         photo = Art.src(subject);
@@ -52,7 +64,7 @@ Engine.register({
     }
 
     ctx.root.classList.add('split');
-    ctx.ask('끼워봐!', subject.name);
+    ctx.ask('끼워봐!', subject ? subject.name : '');
 
     var boardWrap = ctx.el('div', 'jig-wrap');
 
