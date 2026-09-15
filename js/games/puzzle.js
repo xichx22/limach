@@ -15,6 +15,15 @@ Engine.register({
     var N = sizes[ctx.level()];
     var total = N * N;
 
+    var subject, photo;
+
+    /* 부모가 방금 고른 사진이 있으면 그걸로 퍼즐을 만든다.
+       이 놀이에 머무는 동안 계속 그 사진을 쓰고, 판이 끝나면 더 어려워진다. */
+    if (ctx.customPhoto) {
+      subject = { id: 'mine-puzzle', name: ctx.customPhoto.name, src: ctx.customPhoto.src };
+      photo = ctx.customPhoto.src;
+    }
+
     /* 조각마다 단서가 있는 사진만 쓴다 */
     var usable = ctx.theme.items.filter(function (i) {
       if (!Art.src(i)) return false;
@@ -22,12 +31,15 @@ Engine.register({
       return !window.PuzzleOk || PuzzleOk[ctx.theme.id + '_' + i.id];
     });
     if (!usable.length) usable = ctx.theme.items.filter(function (i) { return !!Art.src(i); });
-    if (!usable.length) {
-      ctx.root.appendChild(ctx.el('div', 'notice', '이 주제엔 아직 사진이 없어요.'));
-      return;
+    if (!subject) {
+      if (!usable.length) {
+        ctx.root.appendChild(ctx.el('div', 'notice',
+          '이 주제엔 아직 사진이 없어요.<br>아래 📷 로 사진을 골라도 돼요.'));
+      } else {
+        subject = ctx.one(usable);
+        photo = Art.src(subject);
+      }
     }
-    var subject = ctx.one(usable);
-    var photo = Art.src(subject);
 
     /* 맞물리는 모서리 — 이웃한 두 조각이 같은 곡선을 나눠 갖는다 */
     var H = [], V = [];
@@ -42,11 +54,45 @@ Engine.register({
     ctx.root.classList.add('split');
     ctx.ask('끼워봐!', subject.name);
 
+    var boardWrap = ctx.el('div', 'jig-wrap');
+
+    /* 폰에 있는 사진을 고르면 바로 그 사진 퍼즐이 시작된다 */
+    var bar = ctx.el('div', 'tool-bar');
+    var pickBtn = ctx.el('label', 'tool-btn',
+      '📷 내 사진으로<input type="file" accept="image/*" hidden>');
+    var fileInput = pickBtn.querySelector('input');
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files && fileInput.files[0];
+      fileInput.value = '';
+      if (!f) return;
+      Mine.shrink(f, 640).then(function (url) {
+        ctx.customPhoto = { src: url, name: '내 사진' };
+        Sound.pop();
+        ctx.next();
+      }).catch(function () {
+        alert('이 사진은 읽지 못했어요. 다른 사진으로 해보세요.');
+      });
+    });
+    bar.appendChild(pickBtn);
+
+    if (ctx.customPhoto) {
+      var backBtn2 = ctx.el('button', 'tool-btn', '🖼️ 원래 사진');
+      backBtn2.type = 'button';
+      backBtn2.addEventListener('click', function () {
+        ctx.customPhoto = null;
+        Sound.pop();
+        ctx.next();
+      });
+      bar.appendChild(backBtn2);
+    }
+    boardWrap.appendChild(bar);
+
+    if (!subject) { ctx.root.appendChild(boardWrap); return; }
+
     var preview = ctx.el('div', 'puzzle-preview');
     preview.innerHTML = '<div class="preview-box"><img src="' + photo + '" alt=""></div>' +
                         '<div class="preview-name">' + subject.name + '</div>';
 
-    var boardWrap = ctx.el('div', 'jig-wrap');
     var board = ctx.el('div', 'jig-board');
     boardWrap.appendChild(preview);
     boardWrap.appendChild(board);

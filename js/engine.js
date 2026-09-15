@@ -294,7 +294,7 @@
 
   /* ---------- 놀이 화면 ---------- */
 
-  function play(theme, game) {
+  function play(theme, game, seed) {
     clearScreen();
     app.className = 'app';
     app.style.background = 'linear-gradient(170deg, #fffaf0, ' + shade(theme.color, 82) + ')';
@@ -315,6 +315,7 @@
 
     var ctx = {
       theme: playable,
+      customPhoto: (seed && seed.customPhoto) || null,
       game: game,
       root: root,
       /* 문제를 말과 글자로 동시에 보여준다 — 소리와 글자를 잇는 게 읽기의 시작 */
@@ -462,6 +463,16 @@
         var row = el('div', 'photo-row');
         row.innerHTML = '<img src="' + it.src + '" alt=""><span class="photo-name">' +
                         it.name + '</span>';
+        /* 이 사진으로 바로 퍼즐 */
+        var go = el('button', 'photo-go', '🧩');
+        go.type = 'button';
+        go.setAttribute('aria-label', it.name + ' 퍼즐');
+        go.addEventListener('click', function () {
+          Sound.pop();
+          play(theme, games.puzzle, { customPhoto: { src: it.src, name: it.name } });
+        });
+        row.appendChild(go);
+
         var del = el('button', 'photo-del', '✕');
         del.type = 'button';
         del.addEventListener('click', function () {
