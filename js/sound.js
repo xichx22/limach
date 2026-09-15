@@ -109,6 +109,12 @@
     });
   }
 
+  /* 피아노 음 하나 */
+  function note(freq, dur) {
+    tone(freq, dur || 0.55, 'triangle', 0, 0.24);
+    tone(freq * 2, (dur || 0.55) * 0.5, 'sine', 0, 0.06);
+  }
+
   function stop() {
     if (global.speechSynthesis) {
       try { global.speechSynthesis.cancel(); } catch (e) { /* 무시 */ }
@@ -120,6 +126,7 @@
     speak: speak,
     pop: pop,
     chime: chime,
+    note: note,
     wrong: wrong,
     levelUp: levelUp,
     stop: stop,
