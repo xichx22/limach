@@ -2,6 +2,8 @@
    원칙: 버튼은 크게, 글자는 항상 보이게, 드래그는 없다. */
 
 :root{
+  /* 폰이 화면을 제멋대로 어둡게 바꾸지 않도록 밝은 화면으로 고정한다 */
+  color-scheme: light only;
   --top: env(safe-area-inset-top, 0px);
   --bottom: env(safe-area-inset-bottom, 0px);
   --ink: #3b2a1f;
@@ -10,7 +12,7 @@
 
 *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html, body{ margin:0; padding:0; height:100%; overscroll-behavior:none; }
+html, body{ margin:0; padding:0; height:100%; overscroll-behavior:none; color-scheme: light only; }
 
 body{
   font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
@@ -191,7 +193,10 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   width:100%; font:inherit; font-size:18px; padding:12px 14px;
   border:2px solid #ddd; border-radius:12px; text-align:center;
 }
+.name-row{ display:flex; gap:10px; }
 .name-save{ background:#48c774; color:#fff; border-radius:999px; padding:12px 30px; font-size:18px; }
+.name-skip{ background:#eee; color:#666; border-radius:999px; padding:12px 22px; font-size:17px; }
+.name-count{ font-size:15px; color:#7c5cd6; }
 .photo-list{ display:flex; flex-direction:column; gap:8px; }
 .photo-row{
   display:flex; align-items:center; gap:12px; background:#fff;

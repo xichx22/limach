@@ -300,8 +300,8 @@
       '넣은 사진은 <b>이 기기에만</b> 저장돼요. 인터넷으로 올라가지 않아요.');
     app.appendChild(note);
 
-    var picker = el('label', 'add-photo', '➕ 사진 고르기' +
-      '<input type="file" accept="image/*" hidden>');
+    var picker = el('label', 'add-photo', '➕ 사진 고르기 (여러 장 한 번에)' +
+      '<input type="file" accept="image/*" multiple hidden>');
     var input = picker.querySelector('input');
     app.appendChild(picker);
 
@@ -333,32 +333,49 @@
       });
     }
 
-    input.addEventListener('change', function () {
-      var f = input.files && input.files[0];
-      if (!f) return;
+    /* 여러 장을 한 번에 고르면 한 장씩 차례로 이름을 묻는다 */
+    var queue = [];
+
+    function askName() {
+      if (!queue.length) { form.hidden = true; form.innerHTML = ''; return; }
+      var f = queue[0];
       Mine.shrink(f, 480).then(function (dataUrl) {
-        input.value = '';
         form.hidden = false;
         form.innerHTML =
+          '<div class="name-count">' + (queue.length > 1 ? queue.length + '장 남음' : '마지막 한 장') + '</div>' +
           '<img class="name-preview" src="' + dataUrl + '" alt="">' +
-          '<input class="name-input" type="text" placeholder="이름을 적어주세요 (예: 타요)" maxlength="12">' +
-          '<button class="name-save" type="button">저장</button>';
+          '<input class="name-input" type="text" placeholder="이름을 적어주세요 (예: 타요)" maxlength="14">' +
+          '<div class="name-row">' +
+          '<button class="name-skip" type="button">건너뛰기</button>' +
+          '<button class="name-save" type="button">저장</button>' +
+          '</div>';
         var box = form.querySelector('.name-input');
-        box.focus();
+        try { box.focus(); } catch (e) { /* 무시 */ }
+
+        function next() { queue.shift(); draw(); askName(); }
         function save() {
           var v = (box.value || '').trim();
-          if (!v) { box.focus(); return; }
+          if (!v) { try { box.focus(); } catch (e) {} return; }
           Mine.add(v, dataUrl).then(function () {
-            form.hidden = true; form.innerHTML = '';
-            Sound.chime(); Sound.speak(v);
-            draw();
+            Sound.pop(); Sound.speak(v);
+            next();
           });
         }
         form.querySelector('.name-save').addEventListener('click', save);
+        form.querySelector('.name-skip').addEventListener('click', next);
         box.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
       }).catch(function () {
-        alert('이 사진은 읽지 못했어요. 다른 사진으로 해보세요.');
+        queue.shift();
+        askName();
       });
+    }
+
+    input.addEventListener('change', function () {
+      var files = input.files ? Array.prototype.slice.call(input.files) : [];
+      input.value = '';
+      if (!files.length) return;
+      queue = queue.concat(files);
+      askName();
     });
 
     draw();
