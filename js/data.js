@@ -121,6 +121,19 @@
     })
   ];
 
+  /* 장소 — '어디에 있을까' 놀이에 쓴다. 주제마다 사는 곳이 정해져 있다. */
+  var PLACE_LIST = [
+    { id: 'sea',      name: '바다',   photo: 'place_sea.jpg' },
+    { id: 'rail',     name: '철길',   photo: 'place_rail.jpg' },
+    { id: 'road',     name: '도로',   photo: 'place_road.jpg' },
+    { id: 'site',     name: '공사장', photo: 'place_site.jpg' },
+    { id: 'field',    name: '초원',   photo: 'place_field.jpg' }
+  ];
+  var PLACES = {
+    sea: PLACE_LIST[0], train: PLACE_LIST[1], car: PLACE_LIST[2],
+    special: PLACE_LIST[3], animal: PLACE_LIST[4]
+  };
+
   /* 내 사진 — 부모가 직접 넣은 사진. 이 기기 안에만 있다. */
   var MINE = { id: 'mine', name: '내 사진', icon: '📷', color: '#7c5cd6', sibling: 'animal',
                custom: true, items: [] };
@@ -144,5 +157,6 @@
   }
 
   global.Data = { THEMES: THEMES, MINE: MINE, themes: themes, theme: theme,
-                  usable: usable, markMissing: markMissing };
+                  usable: usable, markMissing: markMissing,
+                  PLACES: PLACES, PLACE_LIST: PLACE_LIST };
 })(window);

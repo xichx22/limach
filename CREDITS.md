@@ -6,7 +6,7 @@
 > 앱의 `내 사진` 기능으로 직접 넣은 사진은 이 목록에 없다.
 > 그 사진들은 기기 안에만 저장되고 저장소에 올라가지 않는다.
 
-사진 82장
+사진 87장
 
 | 사진 | 원저작자 | 라이선스 | 원본 |
 |---|---|---|---|
@@ -42,6 +42,11 @@
 | 트럭 | order_242 from Chile | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:Freightliner_M2_106_6x4_2014_(14240376744).jpg) |
 | 픽업트럭 | Mr.choppers | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:2012_Ssangyong_Actyons_Sports_D200S_(Stockholm).jpg) |
 | 헬리콥터 | Fly45yt | CC BY 4.0 | [원본](https://commons.wikimedia.org/wiki/File:VH-SUF_Taking_Off.jpg) |
+| 공사장 | Whiteghost.ink | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Construction_site_in_Cologne,_Germany_(2017).jpg) |
+| 도로 | Quevaal | CC BY-SA 2.5 | [원본](https://commons.wikimedia.org/wiki/File:Ring_3_and_E6_Oslo_Quevaal.jpg) |
+| 바다 | kallerna | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Atlantic_near_Faroe_Islands.jpg) |
+| 철길 | Dietmar Rabich | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_B%C3%B6rnste,_Eisenbahnlinie_Dortmund-Enschede_--_2015_--_9918.jpg) |
+| 초원 | No machine-readable author provided. Kgwo1972 assumed (based on copyri | Public domain | [원본](https://commons.wikimedia.org/wiki/File:Konza1.jpg) |
 | 게 | George Chernilevsky | Public domain | [원본](https://commons.wikimedia.org/wiki/File:Eriphia_verrucosa_male_2009_G5.jpg) |
 | 고래 | Jérémie Silvestro (If you can improve this photo development, ask me t | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Baleine_%C3%A0_bosse_et_son_baleineau_2.jpg) |
 | 돌고래 | U.S. Navy photo by Photographer's Mate 1st Class Brien Aho. | Public domain | [원본](https://commons.wikimedia.org/wiki/File:NMMP_dolphin_with_locator.jpeg) |

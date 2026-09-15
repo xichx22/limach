@@ -213,6 +213,8 @@
     var grid = el('div', 'game-grid');
     Object.keys(games).forEach(function (k) {
       var g = games[k];
+      /* 주제에 맞지 않는 놀이는 아예 보여주지 않는다 */
+      if (g.supports && !g.supports(theme)) return;
       var lv = Level.get(g.id, theme.id);
       var card = el('button', 'game-card');
       card.type = 'button';
