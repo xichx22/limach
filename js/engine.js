@@ -135,11 +135,13 @@
   }
 
   /* 맞췄을 때 — 그림과 단어를 화면 가득 크게 보여주고 또박또박 읽어준다 */
-  function celebrate(item, done) {
+  function celebrate(item, isNew, done) {
+    if (typeof isNew === 'function') { done = isNew; isNew = false; }
     Sound.chime();
     confetti();
     banner.innerHTML =
-      '<div class="banner-art">' + Art.html(item) + '</div>' +
+      '<div class="banner-art">' + Art.html(item) +
+      (isNew ? '<span class="new-sticker">새 스티커!</span>' : '') + '</div>' +
       '<div class="banner-word">' + item.name + '</div>';
     banner.hidden = false;
     banner.classList.add('show');
@@ -217,6 +219,11 @@
     app.className = 'app home';
     var head = el('div', 'screen-head');
     head.appendChild(el('h1', 'screen-title', '지한이 놀이터'));
+    var album = el('button', 'album-btn', '🏆');
+    album.type = 'button';
+    album.setAttribute('aria-label', '모은 것 보기');
+    album.addEventListener('click', function () { Sound.unlock(); Sound.pop(); albumScreen(); });
+    head.appendChild(album);
     app.appendChild(head);
 
     var grid = el('div', 'home-grid');
@@ -273,9 +280,10 @@
       var lv = Level.get(g.id, theme.id);
       var card = el('button', 'game-card');
       card.type = 'button';
+      /* 단계가 하나뿐인 놀이(색칠·따라 말하기)는 별을 보여주지 않는다 */
       card.innerHTML = '<span class="game-emoji">' + g.icon + '</span>' +
                        '<span class="game-label">' + g.name + '</span>' +
-                       '<span class="game-stars">' + stars(lv, g.levels) + '</span>';
+                       (g.levels > 1 ? '<span class="game-stars">' + stars(lv, g.levels) + '</span>' : '');
       card.addEventListener('click', function () {
         Sound.unlock(); Sound.pop(); play(theme, g);
       });
@@ -318,7 +326,10 @@
       level: function () { return Level.get(game.id, theme.id); },
       win: function (item) {
         var r = Level.win(game, theme.id);
-        celebrate(item, function () {
+        /* 주제에 실제로 들어있는 것만 도감에 모은다 (개수·장소 같은 건 제외) */
+        var real = playable.items.some(function (i) { return i.id === item.id; });
+        var isNew = real ? Collect.add(theme.id, item.id) : false;
+        celebrate(item, isNew, function () {
           if (r.leveledUp) {
             Sound.levelUp();
             setTimeout(function () { say('더 어려운 거 해볼까?'); }, 260);
@@ -346,6 +357,61 @@
 
     say(theme.name + ' ' + game.name);
     setTimeout(next, 700);
+  }
+
+  /* ---------- 🏆 모은 것 도감 ---------- */
+
+  function albumScreen(openId) {
+    clearScreen();
+    app.className = 'app';
+    app.style.background = 'linear-gradient(170deg, #fffaf0, #ffe9c9)';
+
+    var head = el('div', 'screen-head');
+    head.appendChild(backButton(home));
+    head.appendChild(el('h1', 'screen-title', '🏆 내가 모은 것'));
+    app.appendChild(head);
+
+    var wrap = el('div', 'album');
+    Data.themes().forEach(function (t) {
+      var items = Data.usable(t);
+      if (!items.length) return;
+      var p = Collect.progress(t);
+
+      var head2 = el('button', 'album-head');
+      head2.type = 'button';
+      head2.innerHTML = '<span class="album-icon">' + t.icon + '</span>' +
+        '<span class="album-name">' + t.name + '</span>' +
+        '<span class="album-count">' + p.got + ' / ' + p.total + '</span>' +
+        '<span class="album-bar"><i style="width:' +
+        (p.total ? Math.round(p.got / p.total * 100) : 0) + '%"></i></span>';
+
+      var grid = el('div', 'album-grid');
+      grid.hidden = (openId ? openId !== t.id : p.got === 0);
+
+      items.forEach(function (it) {
+        var got = Collect.has(t.id, it.id);
+        var cell = el('button', 'album-cell' + (got ? '' : ' empty'));
+        cell.type = 'button';
+        cell.innerHTML = got
+          ? Art.html(it) + '<span class="album-label">' + it.name + '</span>'
+          : '<span class="album-q">?</span><span class="album-label">?</span>';
+        if (got) {
+          cell.addEventListener('click', function () {
+            Sound.pop(); Sound.speak(spoken(it));
+          });
+        }
+        grid.appendChild(cell);
+      });
+
+      head2.addEventListener('click', function () {
+        Sound.pop();
+        grid.hidden = !grid.hidden;
+      });
+
+      wrap.appendChild(head2);
+      wrap.appendChild(grid);
+    });
+    app.appendChild(wrap);
   }
 
   /* ---------- 내 사진 관리 (부모용) ----------
