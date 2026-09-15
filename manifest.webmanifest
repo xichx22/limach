@@ -1,0 +1,17 @@
+{
+  "name": "지한이 놀이터",
+  "short_name": "지한이",
+  "description": "듣고 찾기, 짝 맞추기, 다른 거 찾기, 그림자 맞추기, 퍼즐",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#fff6e0",
+  "theme_color": "#ffd45e",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
