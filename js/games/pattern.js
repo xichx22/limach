@@ -39,6 +39,8 @@ Engine.register({
 
     ctx.ask('다음은 뭘까?', '');
 
+    ctx.root.classList.add('split');
+
     var strip = ctx.el('div', 'pattern-strip');
     strip.style.setProperty('--n', seq.length + 1);
     seq.forEach(function (it) {
@@ -63,7 +65,7 @@ Engine.register({
     })[0];
     var choices = ctx.shuffle([answer].concat(uniq.slice(0, 2)).concat(extra ? [extra] : []));
 
-    var grid = ctx.grid('play-grid', choices.length, 430);
+    var grid = ctx.grid('play-grid', choices.length, 430, null, 150, 0.46);
     var answered = false;
     choices.forEach(function (it) {
       var t = ctx.tile(it);

@@ -32,6 +32,8 @@ Engine.register({
     ctx.ask('그림을 맞춰봐!', subject.name);
 
     /* 완성 그림 미리보기 — 무엇을 만드는지 알아야 맞출 수 있다 */
+    ctx.root.classList.add('split');
+
     var preview = ctx.el('div', 'puzzle-preview');
     preview.innerHTML = '<div class="preview-box"><img src="' + photo + '" alt=""></div>' +
                         '<div class="preview-name">' + subject.name + '</div>';
@@ -55,9 +57,12 @@ Engine.register({
     }
 
     function build() {
+      var d = document.documentElement;
+      var land = d.clientWidth > d.clientHeight;
+      /* 가로모드에선 미리보기가 옆에 있으니 세로를 거의 다 쓴다 */
       boardPx = Math.floor(Math.min(
-        document.documentElement.clientWidth * 0.94,
-        document.documentElement.clientHeight * 0.58
+        d.clientWidth * (land ? 0.62 : 0.94),
+        d.clientHeight - (land ? 150 : 215)
       ) / N) * N;
       if (boardPx < N * 34) boardPx = N * 34;
 

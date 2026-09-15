@@ -24,6 +24,8 @@ Engine.register({
     var px = 20 + Math.random() * 60;
     var py = 20 + Math.random() * 60;
 
+    ctx.root.classList.add('split');
+
     var box = ctx.el('div', 'zoom-box');
     var src = Art.src(target);
     if (src) {
@@ -35,7 +37,7 @@ Engine.register({
     }
     ctx.root.appendChild(box);
 
-    var grid = ctx.grid('play-grid', n, 380);
+    var grid = ctx.grid('play-grid', n, 380, null, 150, 0.58);
     items.forEach(function (it) {
       var t = ctx.tile(it);
       t.addEventListener('click', function () {

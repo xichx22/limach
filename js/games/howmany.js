@@ -46,8 +46,11 @@ Engine.register({
       return box;
     }
 
+    ctx.root.classList.add('split');
     ctx.root.appendChild(group(qItem, target, 'question'));
-    ctx.root.appendChild(ctx.el('div', 'sub-label', '같은 개수는?'));
+
+    var answerSide = ctx.el('div', 'answer-side');
+    answerSide.appendChild(ctx.el('div', 'sub-label', '같은 개수는?'));
 
     var row = ctx.el('div', 'count-row');
     var answered = false;
@@ -67,7 +70,8 @@ Engine.register({
       });
       row.appendChild(box);
     });
-    ctx.root.appendChild(row);
+    answerSide.appendChild(row);
+    ctx.root.appendChild(answerSide);
 
     setTimeout(function () { ctx.say('몇 개인지 세어보고 같은 개수를 찾아봐'); }, 250);
   }

@@ -4,6 +4,7 @@
 :root{
   /* 폰이 화면을 제멋대로 어둡게 바꾸지 않도록 밝은 화면으로 고정한다 */
   color-scheme: light only;
+  --appw: 760px;   /* 앱이 쓰는 최대 가로 폭 — js/engine.js 와 같은 값 */
   --top: env(safe-area-inset-top, 0px);
   --bottom: env(safe-area-inset-bottom, 0px);
   --ink: #3b2a1f;
@@ -51,7 +52,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   min-height: 100%;
   padding: calc(var(--top) + 10px) 16px calc(var(--bottom) + 20px);
   display: flex; flex-direction: column; gap: 10px;
-  max-width: 760px; margin: 0 auto;
+  max-width: var(--appw); margin: 0 auto;
 }
 .home{ background: linear-gradient(170deg, #fff6e0, #ffe6f0 60%, #e3f2ff); }
 
@@ -121,7 +122,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 .play-grid{
   --cols: 3; --rows: 2; --reserve: 190px;
   /* 칸 크기는 가로로 들어갈 수 있는 크기와 세로로 들어갈 수 있는 크기 중 작은 쪽 */
-  --cw: calc((min(100vw, 760px) - 32px - (var(--cols) - 1) * 10px) / var(--cols));
+  --cw: calc((var(--gridw, min(100vw, var(--appw))) - 32px - (var(--cols) - 1) * 10px) / var(--cols));
   --ch: calc((100vh - var(--reserve) - (var(--rows) - 1) * 10px) / var(--rows));
   --cell: min(var(--cw), var(--ch));
   display:grid; grid-template-columns: repeat(var(--cols), var(--cell)); gap:10px;
@@ -166,6 +167,9 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 /* 없어진 거 찾기 — 잠깐 가리는 순간 */
 .play-grid.hide-all .tile{ visibility:hidden; }
 .play-grid.small{ --cell: min(var(--cw), var(--ch), 96px); }
+@media (orientation: landscape){
+  .play-grid.small{ --cell: min(var(--cw), var(--ch)); }
+}
 .play-grid.small .tile{ opacity:.92; }
 
 /* 순서대로 — 이미 누른 것 */
@@ -179,14 +183,15 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 }
 .count-box.question{
   background:#fffdf3; box-shadow: 0 0 0 4px #ffd45e, 0 6px 14px rgba(0,0,0,.10);
-  min-height: 120px; display:grid; place-items:center;
+  min-height: 130px; width: min(86%, 420px);
+  display:grid; place-items:center; padding:14px;
 }
 .count-box.choice{ min-height: 96px; display:grid; place-items:center; padding:12px 8px; }
 .count-box.choice:active{ transform: scale(.94); }
 /* 사진 크기를 고정해야 '몇 개인지'가 눈에 들어온다 */
 .count-items{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; align-content:center; }
-.count-items .art{ width:44px; height:44px; flex:0 0 auto; }
-.count-box.question .count-items .art{ width:62px; height:62px; }
+.count-items .art{ width: clamp(40px, 6.5vmin, 70px); height: clamp(40px, 6.5vmin, 70px); flex:0 0 auto; }
+.count-box.question .count-items .art{ width: clamp(56px, 9vmin, 96px); height: clamp(56px, 9vmin, 96px); }
 .count-items .art-photo img{ border-radius:8px; }
 .count-row{ display:grid; grid-template-columns: repeat(2, 1fr); gap:9px; width:100%; }
 /* 보기가 3개면 마지막 하나를 가운데로 */
@@ -360,10 +365,60 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 @keyframes pulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.06);} }
 
 /* 태블릿에서는 한 줄에 더 많이 */
-@media (min-width: 720px){
-  .game-grid{ grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+/* ---------------- 넓은 화면 / 가로모드 ---------------- */
+
+/* 태블릿은 폭을 더 쓴다 */
+@media (min-width: 900px){
+  :root{ --appw: 1040px; }
+}
+
+/* 가로로 돌리면 세로가 짧아진다. 주제·놀이 카드를 옆으로 눕힌다. */
+@media (orientation: landscape){
+  /* 문제는 왼쪽, 고르는 곳은 오른쪽 — 위아래로 쌓으면 납작해져서 타일이 작아진다 */
+  .play-root.split{
+    flex-direction: row; align-items:center; justify-content:center;
+    gap: 18px; flex-wrap: nowrap;
+  }
+  .play-root.split > *{ flex: 0 0 auto; max-width: 100%; }
+  .play-root.split .play-grid{ width: auto; }
+  .play-root.split .answer-side{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .play-root.split .pattern-strip{ width: min(48%, 520px); }
+  .play-root.split .count-box.question{ width: min(40%, 380px); max-width:none; }
+  .play-root.split .count-row{ grid-template-columns: repeat(2, 1fr); }
+
   .home-grid{ grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
-  .play-grid{ --cw: calc((760px - 32px - (var(--cols) - 1) * 10px) / var(--cols)); }
+  .game-grid{ grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); }
+  .menu-card{ min-height: 0; }
+  .game-card{ min-height: 0; }
+  .pattern-strip{ max-width: min(100%, 640px); }
+  .count-row{ grid-template-columns: repeat(4, 1fr); }
+  .count-row > .count-box:nth-child(3):last-child{ grid-column: auto; }
+  .zoom-box{ width: min(42vw, 300px); }
+  .where-subject{ width: min(30vw, 230px); }
+  .puzzle-preview{ gap:14px; }
+}
+
+/* 가로모드인데 세로가 아주 짧으면(폰을 눕힌 경우) 머리말을 납작하게 */
+@media (orientation: landscape) and (max-height: 600px){
+  .app{ padding: calc(var(--top) + 6px) 14px calc(var(--bottom) + 10px); gap:6px; }
+  .screen-head{ min-height: 48px; }
+  .back-btn{ width:50px; height:50px; font-size:22px; }
+  .screen-title{ font-size: clamp(18px, 4vw, 26px); }
+  .ask-text{ font-size: 14px; }
+  .ask-word{ font-size: clamp(20px, 4.6vw, 34px); }
+  .menu-emoji{ font-size: clamp(34px, 7vw, 54px); }
+  .menu-label{ font-size: clamp(15px, 2.6vw, 20px); }
+  .game-emoji{ font-size: clamp(24px, 4.6vw, 38px); }
+  .game-label{ font-size: clamp(12px, 2.2vw, 16px); }
+  .game-stars{ font-size: 11px; }
+  .tool-btn{ padding:8px 16px; font-size:15px; }
+  .banner-art{ width:min(34vw, 220px); }
+  .banner-word{ font-size: min(8vw, 52px); }
+  .splash-emoji{ font-size: clamp(50px, 14vh, 96px); }
+  .splash-title{ font-size: clamp(24px, 7vh, 40px); margin:4px 0 14px; }
+  .start-btn{ padding:14px 28px; font-size: clamp(18px, 5vh, 26px); }
 }
 
 @media (prefers-reduced-motion: reduce){

@@ -25,7 +25,7 @@ Engine.register({
 
     ctx.ask('잘 봐!', '');
 
-    var board = ctx.grid('play-grid', n, 300);
+    var board = ctx.grid('play-grid', n, 300, null, 150);
     shown.forEach(function (it) { board.appendChild(ctx.tile(it)); });
     ctx.root.appendChild(board);
 
@@ -43,15 +43,18 @@ Engine.register({
       timers.push(setTimeout(function () {
         ctx.root.innerHTML = '';
 
-        var left = ctx.grid('play-grid', rest.length, 440);
+        ctx.root.classList.add('split');
+
+        var left = ctx.grid('play-grid', rest.length, 440, null, 170, 0.42);
         left.classList.add('small');
         ctx.shuffle(rest).forEach(function (it) { left.appendChild(ctx.tile(it)); });
         ctx.root.appendChild(left);
 
-        ctx.root.appendChild(ctx.el('div', 'sub-label', '없어진 건 누구?'));
+        var answerSide = ctx.el('div', 'answer-side');
+        answerSide.appendChild(ctx.el('div', 'sub-label', '없어진 건 누구?'));
 
         var choices = ctx.shuffle([target].concat(extras));
-        var pick = ctx.grid('play-grid', choices.length, 560);
+        var pick = ctx.grid('play-grid', choices.length, 560, null, 190, 0.48);
         var answered = false;
         choices.forEach(function (it) {
           var t = ctx.tile(it);
@@ -65,7 +68,8 @@ Engine.register({
           });
           pick.appendChild(t);
         });
-        ctx.root.appendChild(pick);
+        answerSide.appendChild(pick);
+        ctx.root.appendChild(answerSide);
       }, 900));
     }, lookMs));
 

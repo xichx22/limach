@@ -44,24 +44,79 @@
     return n;
   }
 
-  function gridCols(n) {
-    var wide = document.documentElement.clientWidth >= 720;
-    if (n <= 6) return wide ? 3 : 2;
-    if (n <= 12) return wide ? 4 : 3;
-    return wide ? 5 : 4;
+  /* 앱이 쓸 수 있는 가로 폭 (CSS 와 같은 값을 쓴다) */
+  function appWidth() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--appw');
+    var max = parseFloat(v) || 760;
+    return Math.min(document.documentElement.clientWidth, max);
+  }
+
+  /* 칸 수를 화면 모양에 맞춰 정한다.
+     세로로 길면 칸을 적게, 가로로 넓으면 칸을 많이 둬야 타일이 커진다.
+     가능한 칸 수를 전부 재보고 타일이 가장 커지는 쪽을 고른다. */
+  function gridCols(n, reserve, width) {
+    reserve = reserve || 190;
+    var gap = 10;
+    var availW = (width || appWidth()) - 32;
+    var availH = document.documentElement.clientHeight - reserve;
+    var best = 1, bestSize = -1;
+    for (var c = 1; c <= n; c++) {
+      var r = Math.ceil(n / c);
+      var cw = (availW - (c - 1) * gap) / c;
+      var ch = (availH - (r - 1) * gap) / r;
+      var size = Math.min(cw, ch);
+      if (size > bestSize + 0.5) { bestSize = size; best = c; }
+    }
+    return best;
   }
 
   /* 놀이판을 만든다. 칸 크기는 화면 너비와 높이 중 작은 쪽에 맞춰지므로
      6개든 12개든 화면을 꽉 채우면서 잘리지 않는다.
      reserve = 머리말·버튼 등 놀이판 말고 쓰는 세로 공간(px) */
-  function makeGrid(cls, n, reserve, cols) {
-    cols = cols || gridCols(n);
+  function isLandscape() {
+    var d = document.documentElement;
+    return d.clientWidth > d.clientHeight;
+  }
+
+  /* reserve = 놀이판 말고 쓰는 세로 공간(px).
+     landReserve = 가로모드에서의 값. 가로모드에선 문제를 옆에 두므로 훨씬 작다. */
+  function makeGrid(cls, n, reserve, cols, landReserve, landFrac) {
+    reserve = reserve || 190;
     var g = el('div', cls);
-    g.style.setProperty('--cols', cols);
-    g.style.setProperty('--rows', Math.ceil(n / cols));
-    g.style.setProperty('--reserve', (reserve || 190) + 'px');
+    g.dataset.n = n;
+    g.dataset.reserve = reserve;
+    g.dataset.landReserve = landReserve || reserve;
+    g.dataset.landFrac = landFrac || 1;   // 가로모드에서 이 판이 쓰는 가로 비율
+    if (cols) g.dataset.fixedCols = cols;
+    layoutGrid(g);
     return g;
   }
+
+  /* 칸 수와 칸 크기를 모두 여기서 정한다.
+     CSS 가 따로 계산하면 서로 어긋나서 화면 밖으로 넘친다. */
+  function layoutGrid(g) {
+    var land = isLandscape();
+    var n = parseInt(g.dataset.n, 10) || 1;
+    var reserve = parseInt(
+      land ? (g.dataset.landReserve || g.dataset.reserve) : g.dataset.reserve, 10) || 190;
+    var frac = land ? (parseFloat(g.dataset.landFrac) || 1) : 1;
+    var width = appWidth() * frac;
+    var cols = parseInt(g.dataset.fixedCols, 10) || gridCols(n, reserve, width);
+    g.style.setProperty('--gridw', Math.round(width) + 'px');
+    g.style.setProperty('--cols', cols);
+    g.style.setProperty('--rows', Math.ceil(n / cols));
+    g.style.setProperty('--reserve', reserve + 'px');
+  }
+
+  /* 화면을 돌리면 칸 수를 다시 잡는다. 놀던 내용은 그대로 둔다. */
+  var relayoutTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(relayoutTimer);
+    relayoutTimer = setTimeout(function () {
+      var grids = document.querySelectorAll('.play-grid, .card-grid');
+      Array.prototype.forEach.call(grids, layoutGrid);
+    }, 120);
+  });
 
   /* ---------- 칭찬 / 아쉬움 ---------- */
 
@@ -284,6 +339,7 @@
 
     function next() {
       if (current) { try { current(); } catch (e) { /* 무시 */ } current = null; }
+      root.className = 'play-root';
       root.innerHTML = '';
       current = game.round(ctx) || null;
     }

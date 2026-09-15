@@ -43,7 +43,7 @@ Engine.register({
     bar.appendChild(again);
     ctx.root.appendChild(bar);
 
-    var grid = ctx.grid('play-grid', board.length, 250);
+    var grid = ctx.grid('play-grid', board.length, 250, null, 170);
     var tiles = [];
     board.forEach(function (it) {
       var t = ctx.tile(it);

@@ -26,7 +26,7 @@ Engine.register({
     bar.appendChild(again);
     ctx.root.appendChild(bar);
 
-    var grid = ctx.grid('play-grid', n, 250);
+    var grid = ctx.grid('play-grid', n, 250, null, 170);
 
     items.forEach(function (it) {
       var t = ctx.tile(it);

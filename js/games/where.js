@@ -28,11 +28,13 @@ Engine.register({
 
     ctx.ask('어디에 있을까?', subject.name);
 
+    ctx.root.classList.add('split');
+
     var big = ctx.el('div', 'where-subject');
     big.innerHTML = Art.html(subject, { eager: true });
     ctx.root.appendChild(big);
 
-    var grid = ctx.grid('play-grid', choices.length, 430);
+    var grid = ctx.grid('play-grid', choices.length, 430, null, 150, 0.58);
     choices.forEach(function (p) {
       var t = ctx.tile(p);
       t.addEventListener('click', function () {

@@ -34,7 +34,7 @@ Engine.register({
 
     ctx.ask('다른 거 하나 찾아봐!', '');
 
-    var grid = ctx.grid('play-grid', n, 180);
+    var grid = ctx.grid('play-grid', n, 180, null, 140);
 
     items.forEach(function (it) {
       var t = ctx.tile(it);
