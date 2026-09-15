@@ -15,7 +15,9 @@ Engine.register({
     var n = counts[lv];
 
     /* 마지막 단계에서는 '비슷한 주제'에서 가져와서 훨씬 헷갈리게 만든다 */
-    var others = Data.THEMES.filter(function (t) { return t.id !== ctx.theme.id; });
+    var others = Data.themes().filter(function (t) {
+      return t.id !== ctx.theme.id && Data.usable(t).length > 0;
+    });
     var pool;
     if (lv >= 2) {
       pool = others.filter(function (t) { return t.id === ctx.theme.sibling; });
@@ -25,7 +27,7 @@ Engine.register({
     if (!pool.length) pool = others;
 
     var oddTheme = ctx.one(pool);
-    var odd = ctx.one(oddTheme.items);
+    var odd = ctx.one(Data.usable(oddTheme));
     var same = ctx.pick(ctx.theme.items, n - 1);
     var items = ctx.shuffle(same.concat([odd]));
     var answered = false;

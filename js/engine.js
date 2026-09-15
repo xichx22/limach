@@ -158,7 +158,7 @@
     app.appendChild(head);
 
     var grid = el('div', 'home-grid');
-    Data.THEMES.forEach(function (t) {
+    Data.themes().forEach(function (t) {
       var card = el('button', 'menu-card');
       card.type = 'button';
       card.style.background = 'linear-gradient(150deg, ' + t.color + ', ' + shade(t.color, -22) + ')';
@@ -170,6 +170,12 @@
       grid.appendChild(card);
     });
     app.appendChild(grid);
+
+    /* 사진 출처 표기 — 위키미디어 공용 사진의 이용 조건이다 */
+    var credit = el('div', 'credit',
+      '사진 출처: <a href="https://github.com/xichx22/limach/blob/main/CREDITS.md" ' +
+      'target="_blank" rel="noopener">위키미디어 공용</a>');
+    app.appendChild(credit);
   }
 
   /* ---------- 주제 안: 게임 고르기 ---------- */
@@ -183,6 +189,19 @@
     head.appendChild(backButton(home));
     head.appendChild(el('h1', 'screen-title', theme.icon + ' ' + theme.name));
     app.appendChild(head);
+
+    if (theme.custom) {
+      var manage = el('button', 'manage-btn', '📷 사진 넣고 빼기');
+      manage.type = 'button';
+      manage.addEventListener('click', function () { Sound.pop(); photoManager(theme); });
+      app.appendChild(manage);
+      if (Data.usable(theme).length < 4) {
+        app.appendChild(el('div', 'notice',
+          '사진을 4장 넘게 넣으면 놀이를 할 수 있어요.<br>' +
+          '넣은 사진은 이 기기에만 저장되고 아무 데도 올라가지 않아요.'));
+        return;
+      }
+    }
 
     var grid = el('div', 'game-grid');
     Object.keys(games).forEach(function (k) {
@@ -217,8 +236,13 @@
     var root = el('div', 'play-root');
     app.appendChild(root);
 
+    /* 사진이 없는 항목은 빈 칸으로 보이므로 게임에 내보내지 않는다 */
+    var playable = { id: theme.id, name: theme.name, icon: theme.icon,
+                     color: theme.color, sibling: theme.sibling, custom: theme.custom,
+                     items: Data.usable(theme) };
+
     var ctx = {
-      theme: theme,
+      theme: playable,
       game: game,
       root: root,
       /* 문제를 말과 글자로 동시에 보여준다 — 소리와 글자를 잇는 게 읽기의 시작 */
@@ -259,6 +283,87 @@
     setTimeout(next, 700);
   }
 
+  /* ---------- 내 사진 관리 (부모용) ----------
+     고른 사진은 이 기기 안에만 저장된다. 서버로 보내지 않는다. */
+
+  function photoManager(theme) {
+    clearScreen();
+    app.className = 'app';
+    app.style.background = 'linear-gradient(170deg, #fffaf0, ' + shade(theme.color, 82) + ')';
+
+    var head = el('div', 'screen-head');
+    head.appendChild(backButton(function () { menu(theme); }));
+    head.appendChild(el('h1', 'screen-title', '📷 내 사진'));
+    app.appendChild(head);
+
+    var note = el('div', 'notice',
+      '넣은 사진은 <b>이 기기에만</b> 저장돼요. 인터넷으로 올라가지 않아요.');
+    app.appendChild(note);
+
+    var picker = el('label', 'add-photo', '➕ 사진 고르기' +
+      '<input type="file" accept="image/*" hidden>');
+    var input = picker.querySelector('input');
+    app.appendChild(picker);
+
+    var form = el('div', 'name-form');
+    form.hidden = true;
+    app.appendChild(form);
+
+    var list = el('div', 'photo-list');
+    app.appendChild(list);
+
+    function draw() {
+      list.innerHTML = '';
+      var items = Mine.all();
+      if (!items.length) {
+        list.appendChild(el('div', 'notice', '아직 넣은 사진이 없어요.'));
+        return;
+      }
+      items.forEach(function (it) {
+        var row = el('div', 'photo-row');
+        row.innerHTML = '<img src="' + it.src + '" alt=""><span class="photo-name">' +
+                        it.name + '</span>';
+        var del = el('button', 'photo-del', '✕');
+        del.type = 'button';
+        del.addEventListener('click', function () {
+          Mine.remove(it.id).then(draw);
+        });
+        row.appendChild(del);
+        list.appendChild(row);
+      });
+    }
+
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      if (!f) return;
+      Mine.shrink(f, 480).then(function (dataUrl) {
+        input.value = '';
+        form.hidden = false;
+        form.innerHTML =
+          '<img class="name-preview" src="' + dataUrl + '" alt="">' +
+          '<input class="name-input" type="text" placeholder="이름을 적어주세요 (예: 타요)" maxlength="12">' +
+          '<button class="name-save" type="button">저장</button>';
+        var box = form.querySelector('.name-input');
+        box.focus();
+        function save() {
+          var v = (box.value || '').trim();
+          if (!v) { box.focus(); return; }
+          Mine.add(v, dataUrl).then(function () {
+            form.hidden = true; form.innerHTML = '';
+            Sound.chime(); Sound.speak(v);
+            draw();
+          });
+        }
+        form.querySelector('.name-save').addEventListener('click', save);
+        box.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); });
+      }).catch(function () {
+        alert('이 사진은 읽지 못했어요. 다른 사진으로 해보세요.');
+      });
+    });
+
+    draw();
+  }
+
   /* 색을 밝게/어둡게 (퍼센트) */
   function shade(hex, pct) {
     var n = parseInt(hex.slice(1), 16);
@@ -284,7 +389,7 @@
       Sound.pop();
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
-      home();
+      Mine.load().then(home, home);
       if (!Sound.canSpeakKorean()) {
         setTimeout(function () {
           var w = el('div', 'novoice', '🔇 이 기기에 한국어 음성이 없어요.<br>글자로만 나와요.');

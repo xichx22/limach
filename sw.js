@@ -1,12 +1,12 @@
 /* 오프라인에서도 돌아가게 파일을 미리 저장해둔다.
    차 안이나 지하철처럼 인터넷이 없는 곳에서도 놀 수 있다. */
-var CACHE = 'jihan-play-v1';
+var CACHE = 'jihan-play-v2';
 var FILES = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css',
-  './js/sound.js', './js/art.js', './js/data.js', './js/level.js', './js/engine.js',
-  './js/games/listen.js', './js/games/oddone.js', './js/games/shadow.js',
-  './js/games/memory.js', './js/games/puzzle.js',
+  './js/sound.js', './js/art.js', './js/data.js', './js/photos.js', './js/mine.js',
+  './js/level.js', './js/engine.js',
+  './js/games/listen.js', './js/games/oddone.js', './js/games/zoom.js', './js/games/puzzle.js',
   './icon-192.png', './icon-512.png'
 ];
 
