@@ -305,6 +305,14 @@
     var input = picker.querySelector('input');
     app.appendChild(picker);
 
+    /* 여러 개를 한 장에 모아둔 그림(도감 같은)을 칸칸이 잘라서 넣는다 */
+    var sliceBtn = el('button', 'add-photo alt', '🔳 모아놓은 사진 잘라서 넣기');
+    sliceBtn.type = 'button';
+    sliceBtn.addEventListener('click', function () {
+      Sound.pop(); sheetSlicer(theme);
+    });
+    app.appendChild(sliceBtn);
+
     var form = el('div', 'name-form');
     form.hidden = true;
     app.appendChild(form);
@@ -379,6 +387,140 @@
     });
 
     draw();
+  }
+
+  /* ---------- 모아놓은 사진 자르기 ----------
+     캐릭터 도감처럼 여러 개가 한 장에 모여 있는 그림을 칸 수에 맞춰 잘라
+     한 번에 넣는다. 자르는 일은 전부 이 기기 안에서 일어난다. */
+
+  function sheetSlicer(theme) {
+    clearScreen();
+    app.className = 'app';
+    app.style.background = 'linear-gradient(170deg, #fffaf0, ' + shade(theme.color, 82) + ')';
+
+    var head = el('div', 'screen-head');
+    head.appendChild(backButton(function () { photoManager(theme); }));
+    head.appendChild(el('h1', 'screen-title', '🔳 잘라서 넣기'));
+    app.appendChild(head);
+
+    app.appendChild(el('div', 'notice',
+      '여러 개가 한 장에 모여 있는 그림을 칸칸이 잘라서 넣어요.<br>' +
+      '아래 미리보기를 보면서 칸 수를 맞추면 돼요.'));
+
+    var pick = el('label', 'add-photo', '① 모아놓은 사진 고르기' +
+      '<input type="file" accept="image/*" hidden>');
+    var file = pick.querySelector('input');
+    app.appendChild(pick);
+
+    var panel = el('div', 'slice-panel');
+    panel.hidden = true;
+    panel.innerHTML =
+      '<div class="slice-grid">' +
+      '<label>가로 칸<input class="s-cols" type="number" value="4" min="1" max="12"></label>' +
+      '<label>세로 칸<input class="s-rows" type="number" value="15" min="1" max="30"></label>' +
+      '<label>위 여백 %<input class="s-top" type="number" value="3" min="0" max="40"></label>' +
+      '<label>아래 여백 %<input class="s-bot" type="number" value="0" min="0" max="40"></label>' +
+      '<label>칸 아래 글자 잘라내기 %<input class="s-cut" type="number" value="18" min="0" max="50"></label>' +
+      '</div>' +
+      '<div class="slice-hint">② 이름을 한 줄에 하나씩 적어주세요 (왼쪽→오른쪽, 위→아래 순서)</div>' +
+      '<textarea class="s-names" rows="5" placeholder="타요\n로기\n라니\n가니"></textarea>' +
+      '<div class="slice-preview"></div>' +
+      '<button class="s-save" type="button">③ 전부 넣기</button>';
+    app.appendChild(panel);
+
+    var img = null;
+
+    function nums() {
+      function v(sel, d) {
+        var n = parseInt(panel.querySelector(sel).value, 10);
+        return isNaN(n) ? d : n;
+      }
+      return { cols: Math.max(1, v('.s-cols', 4)), rows: Math.max(1, v('.s-rows', 15)),
+               top: v('.s-top', 0), bot: v('.s-bot', 0), cut: v('.s-cut', 0) };
+    }
+
+    function names() {
+      return panel.querySelector('.s-names').value
+        .split(/[\n,]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    }
+
+    /* 칸 하나를 잘라 정사각형 사진으로 만든다 */
+    function cut(r, c, n, size) {
+      var top = img.height * n.top / 100;
+      var bottom = img.height * (1 - n.bot / 100);
+      var cellH = (bottom - top) / n.rows;
+      var cellW = img.width / n.cols;
+      var sw = cellW, sh = cellH * (1 - n.cut / 100);
+      var side = Math.min(sw, sh);
+      var sx = c * cellW + (sw - side) / 2;
+      var sy = top + r * cellH + (sh - side) / 2;
+      var cv = document.createElement('canvas');
+      cv.width = cv.height = size || 480;
+      var g = cv.getContext('2d');
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(img, sx, sy, side, side, 0, 0, cv.width, cv.height);
+      return cv.toDataURL('image/jpeg', 0.82);
+    }
+
+    function preview() {
+      if (!img) return;
+      var n = nums(), nm = names();
+      var box = panel.querySelector('.slice-preview');
+      box.innerHTML = '';
+      var total = n.cols * n.rows, shown = Math.min(total, 60);
+      for (var i = 0; i < shown; i++) {
+        var cell = el('div', 'slice-cell');
+        cell.innerHTML = '<img src="' + cut(Math.floor(i / n.cols), i % n.cols, n, 120) + '">' +
+                         '<span>' + (nm[i] || '?') + '</span>';
+        box.appendChild(cell);
+      }
+      box.appendChild(el('div', 'slice-more',
+        '모두 ' + total + '칸 / 이름 ' + nm.length + '개' +
+        (nm.length < total ? ' (이름 적은 만큼만 들어가요)' : '')));
+    }
+
+    file.addEventListener('change', function () {
+      var f = file.files && file.files[0];
+      if (!f) return;
+      var url = URL.createObjectURL(f);
+      var im = new Image();
+      im.onload = function () {
+        img = im;
+        URL.revokeObjectURL(url);
+        panel.hidden = false;
+        preview();
+      };
+      im.onerror = function () { URL.revokeObjectURL(url); alert('사진을 읽지 못했어요.'); };
+      im.src = url;
+    });
+
+    ['.s-cols', '.s-rows', '.s-top', '.s-bot', '.s-cut'].forEach(function (sel) {
+      panel.querySelector(sel).addEventListener('input', preview);
+    });
+    panel.querySelector('.s-names').addEventListener('input', preview);
+
+    panel.querySelector('.s-save').addEventListener('click', function () {
+      if (!img) return;
+      var n = nums(), nm = names();
+      if (!nm.length) { alert('이름을 한 줄에 하나씩 적어주세요.'); return; }
+      var btn = panel.querySelector('.s-save');
+      btn.disabled = true;
+      btn.textContent = '넣는 중…';
+      var i = 0;
+      (function step() {
+        if (i >= nm.length || i >= n.cols * n.rows) {
+          Sound.chime();
+          photoManager(theme);
+          return;
+        }
+        var url = cut(Math.floor(i / n.cols), i % n.cols, n, 480);
+        Mine.add(nm[i], url).then(function () {
+          i++;
+          btn.textContent = '넣는 중… ' + i + '/' + nm.length;
+          setTimeout(step, 0);
+        });
+      })();
+    });
   }
 
   /* 색을 밝게/어둡게 (퍼센트) */
