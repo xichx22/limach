@@ -6,19 +6,18 @@ Engine.register({
   id: 'puzzle',
   name: '퍼즐',
   icon: '🧩',
-  levels: 4,
-  upAfter: 1,
-  downAfter: 2,
+  levels: 1,
 
   round: function (ctx) {
-    var sizes = [3, 4, 5, 6];
-    var N = sizes[ctx.level()];
-    var total = N * N;
+    /* 가로 3 × 세로 2 = 여섯 조각. 30개월에게는 이만큼이 딱 맞다.
+       더 어렵게 올리지 않는다 — 끝까지 끼우는 재미가 먼저다. */
+    var COLS = 3, ROWS = 2;
+    var total = COLS * ROWS;
 
     var subject, photo;
 
     /* 부모가 방금 고른 사진이 있으면 그걸로 퍼즐을 만든다.
-       이 놀이에 머무는 동안 계속 그 사진을 쓰고, 판이 끝나면 더 어려워진다. */
+       이 놀이에 머무는 동안 계속 그 사진을 쓴다. */
     if (ctx.customPhoto) {
       subject = { id: 'mine-puzzle', name: ctx.customPhoto.name, src: ctx.customPhoto.src };
       photo = ctx.customPhoto.src;
@@ -55,9 +54,9 @@ Engine.register({
 
     /* 맞물리는 모서리 — 이웃한 두 조각이 같은 곡선을 나눠 갖는다 */
     var H = [], V = [];
-    for (var r = 0; r < N; r++) {
+    for (var r = 0; r < ROWS; r++) {
       H[r] = []; V[r] = [];
-      for (var c = 0; c < N; c++) {
+      for (var c = 0; c < COLS; c++) {
         H[r][c] = Math.random() < 0.5 ? 1 : -1;   // (r,c) 와 (r,c+1) 사이
         V[r][c] = Math.random() < 0.5 ? 1 : -1;   // (r,c) 와 (r+1,c) 사이
       }
@@ -113,7 +112,7 @@ Engine.register({
     var tray = ctx.el('div', 'jig-tray');
     ctx.root.appendChild(tray);
 
-    var cell = 0, tab = 0, boardPx = 0, trayCell = 0;
+    var cell = 0, tab = 0, boardW = 0, boardH = 0, trayCell = 0;
     var placed = {};                 // 자리에 들어간 조각
     var pool = ctx.shuffle((function () {
       var a = []; for (var i = 0; i < total; i++) a.push(i); return a;
@@ -139,8 +138,8 @@ Engine.register({
       var x0 = t, y0 = t;
       var d = 'M' + x0 + ' ' + y0;
       d += side(x0, y0, 1, 0, e, r > 0 ? -V[r - 1][c] : 0);              // 위
-      d += side(x0 + e, y0, 0, 1, e, c < N - 1 ? H[r][c] : 0);           // 오른쪽
-      d += side(x0 + e, y0 + e, -1, 0, e, r < N - 1 ? V[r][c] : 0);      // 아래
+      d += side(x0 + e, y0, 0, 1, e, c < COLS - 1 ? H[r][c] : 0);        // 오른쪽
+      d += side(x0 + e, y0 + e, -1, 0, e, r < ROWS - 1 ? V[r][c] : 0);   // 아래
       d += side(x0, y0 + e, 0, -1, e, c > 0 ? -H[r][c - 1] : 0);         // 왼쪽
       return d + 'Z';
     }
@@ -148,11 +147,11 @@ Engine.register({
     function stylePiece(node, idx, e) {
       e = e || cell;
       var t = Math.round(e * 0.2);
-      var r = Math.floor(idx / N), c = idx % N;
+      var r = Math.floor(idx / COLS), c = idx % COLS;
       node.style.width = (e + t * 2) + 'px';
       node.style.height = (e + t * 2) + 'px';
       node.style.backgroundImage = 'url("' + photo + '")';
-      node.style.backgroundSize = (e * N) + 'px ' + (e * N) + 'px';
+      node.style.backgroundSize = (e * COLS) + 'px ' + (e * ROWS) + 'px';
       node.style.backgroundPosition = (-(c * e - t)) + 'px ' + (-(r * e - t)) + 'px';
       var d = pathFor(r, c, e, t);
       node.style.clipPath = 'path("' + d + '")';
@@ -176,18 +175,22 @@ Engine.register({
       var availW = land ? d.clientWidth * 0.56 : d.clientWidth * 0.95;
       var availH = d.clientHeight - headH - previewH - (land ? 12 : trayH + 14);
 
-      boardPx = Math.floor(Math.min(availW, availH) / N) * N;
-      if (boardPx < N * 46) boardPx = N * 46;
-      cell = boardPx / N;
+      /* 판이 정사각이 아니다. 가로·세로 중 더 빡빡한 쪽에 조각 크기를 맞춘다. */
+      setCell(Math.floor(Math.min(availW / COLS, availH / ROWS)));
+    }
+
+    function setCell(px) {
+      cell = Math.max(46, px);
+      boardW = cell * COLS;
+      boardH = cell * ROWS;
       tab = Math.round(cell * 0.2);
       if (trayCell > cell) trayCell = Math.floor(cell);
     }
 
     function buildBoard() {
       board.innerHTML = '';
-      board.style.width = boardPx + 'px';
-      board.style.height = boardPx + 'px';
-      board.style.setProperty('--n', N);
+      board.style.width = boardW + 'px';
+      board.style.height = boardH + 'px';
 
       var ghost = ctx.el('div', 'jig-ghost');
       ghost.style.backgroundImage = 'url("' + photo + '")';
@@ -195,7 +198,7 @@ Engine.register({
 
       for (var i = 0; i < total; i++) {
         (function (i) {
-          var r = Math.floor(i / N), c = i % N;
+          var r = Math.floor(i / COLS), c = i % COLS;
           var slot = ctx.el('div', 'jig-slot');
           slot.dataset.slot = i;
           slot.style.left = (c * cell) + 'px';
@@ -211,7 +214,7 @@ Engine.register({
     }
 
     function drawPlaced(idx) {
-      var r = Math.floor(idx / N), c = idx % N;
+      var r = Math.floor(idx / COLS), c = idx % COLS;
       var node = ctx.el('div', 'jig-fixed');
       node.style.left = (c * cell - tab) + 'px';
       node.style.top = (r * cell - tab) + 'px';
@@ -320,10 +323,7 @@ Engine.register({
         var over = d.scrollHeight - d.clientHeight;
         if (over <= 2) return;
         adjusted = true;
-        boardPx = Math.max(N * 46, Math.floor((boardPx - over - 10) / N) * N);
-        cell = boardPx / N;
-        tab = Math.round(cell * 0.2);
-        if (trayCell > cell) trayCell = Math.floor(cell);
+        setCell(Math.floor((boardH - over - 10) / ROWS));
         buildBoard();
         fillTray();
       });

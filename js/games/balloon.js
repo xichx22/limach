@@ -56,9 +56,11 @@ Engine.register({
       return !live.some(function (b) { return b.item.id === target.id; });
     }
 
-    function spawn(forceTarget) {
+    /* noTarget 이면 정답이 아닌 것만 고른다 — 처음 띄울 때 순서를 정해두기 위해서다 */
+    function spawn(forceTarget, noTarget) {
       if (done) return;
-      var item = forceTarget || (needTarget() && Math.random() < 0.5 ? target : ctx.one(others));
+      var item = forceTarget ||
+        (!noTarget && needTarget() && Math.random() < 0.5 ? target : ctx.one(others));
       var b = ctx.el('button', 'balloon');
       b.type = 'button';
       b.item = item;
@@ -107,10 +109,15 @@ Engine.register({
       live.push(b);
     }
 
-    /* 처음엔 조금씩 시차를 두고 띄운다 */
-    spawn(target);
-    for (var i = 1; i < many; i++) {
-      (function (k) { timers.push(setTimeout(function () { spawn(); }, k * 700)); })(i);
+    /* 처음엔 조금씩 시차를 두고 띄운다.
+       정답을 맨 앞에 띄우면 늘 첫 풍선만 누르면 맞는다 — 찾는 놀이가 되지 않는다.
+       그래서 정답이 몇 번째로 뜰지 매번 다시 뽑는다. */
+    var targetAt = Math.floor(Math.random() * many);
+    for (var i = 0; i < many; i++) {
+      (function (k) {
+        var go = function () { spawn(k === targetAt ? target : null, k !== targetAt); };
+        if (k === 0) go(); else timers.push(setTimeout(go, k * 700));
+      })(i);
     }
 
     /* 목표가 오래 안 보이면 하나 더 띄워준다 */
