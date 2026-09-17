@@ -169,34 +169,13 @@
 
   /* ---------- 화면 틀 ---------- */
 
-  /* 뒤로가기는 1.2초 길게 눌러야 동작한다. 지한이가 실수로 나가서 우는 일 방지. */
+  /* 홈 버튼. 예전엔 1.2초 길게 눌러야 했다 — 실수로 나가는 걸 막으려고.
+     실제로 써보니 기다리는 게 답답해서 그냥 누르면 나가게 했다. */
   function backButton(onBack) {
-    var b = el('button', 'back-btn', '<span class="ring"></span><span class="ico">🏠</span>');
+    var b = el('button', 'back-btn', '<span class="ico">🏠</span>');
     b.type = 'button';
-    b.setAttribute('aria-label', '뒤로 (길게 누르기)');
-    var timer = null, raf = null, start = 0;
-    var HOLD = 1200;
-
-    function tick() {
-      var p = Math.min(1, (Date.now() - start) / HOLD);
-      b.style.setProperty('--p', (p * 360) + 'deg');
-      if (p < 1) raf = requestAnimationFrame(tick);
-    }
-    function begin(e) {
-      e.preventDefault();
-      start = Date.now();
-      tick();
-      timer = setTimeout(function () { cancel(); Sound.pop(); onBack(); }, HOLD);
-    }
-    function cancel() {
-      if (timer) { clearTimeout(timer); timer = null; }
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-      b.style.setProperty('--p', '0deg');
-    }
-    b.addEventListener('pointerdown', begin);
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) {
-      b.addEventListener(ev, cancel);
-    });
+    b.setAttribute('aria-label', '홈으로');
+    b.addEventListener('click', function () { Sound.pop(); onBack(); });
     return b;
   }
 
