@@ -12,25 +12,67 @@
   }
 
   var THEMES = [
+    /* 예전엔 '특수자동차' 하나에 열두 대를 다 넣었다.
+       소방차와 쓰레기차가 한 칸에 섞여 있으면 고르기도 어렵고,
+       놀이에서 비슷한 것끼리 나오지도 않는다. 하는 일로 나눴다. */
     withPhotos({
-      id: 'special', name: '특수자동차', icon: '🚜', color: '#e8503a', sibling: 'car',
+      id: 'fire', name: '소방차', icon: '🚒', color: '#e8503a', sibling: 'build',
       items: [
-        { id: 'firetruck', name: '소방차' },
-        { id: 'dump',      name: '덤프트럭' },
-        { id: 'mixer',     name: '레미콘' },
-        { id: 'crane',     name: '크레인' },
-        { id: 'excavator', name: '굴착기' },
-        { id: 'bulldozer', name: '불도저' },
-        { id: 'forklift',  name: '지게차' },
-        { id: 'tractor',   name: '트랙터' },
-        { id: 'tanklorry', name: '탱크로리' },
-        { id: 'combine',   name: '콤바인' },
-        { id: 'tiller',    name: '경운기' },
-        { id: 'roller',    name: '로드롤러' }
+        { id: 'pumper',    name: '소방차' },
+        { id: 'ladder',    name: '사다리차' },
+        { id: 'watertank', name: '물탱크차' },
+        { id: 'wildfire',  name: '산불차' },
+        { id: 'airport',   name: '공항소방차' }
       ]
     }),
     withPhotos({
-      id: 'car', name: '자동차', icon: '🚗', color: '#2f7fe0', sibling: 'special',
+      id: 'build', name: '공사차', icon: '🚧', color: '#eab308', sibling: 'farm',
+      items: [
+        { id: 'excavator', name: '굴착기' },
+        { id: 'bulldozer', name: '불도저' },
+        { id: 'dump',      name: '덤프트럭' },
+        { id: 'mixer',     name: '레미콘' },
+        { id: 'pumpcar',   name: '콘크리트펌프카' },
+        { id: 'crane',     name: '크레인' },
+        { id: 'skylift',   name: '고소작업차' },
+        { id: 'forklift',  name: '지게차' },
+        { id: 'loader',    name: '휠로더' },
+        { id: 'grader',    name: '그레이더' },
+        { id: 'roller',    name: '로드롤러' },
+        { id: 'paver',     name: '도로포장차' }
+      ]
+    }),
+    withPhotos({
+      id: 'farm', name: '농사차', icon: '🚜', color: '#3fa85a', sibling: 'build',
+      items: [
+        { id: 'tractor',      name: '트랙터' },
+        { id: 'combine',      name: '콤바인' },
+        { id: 'tiller',       name: '경운기' },
+        { id: 'transplanter', name: '이앙기' }
+      ]
+    }),
+    withPhotos({
+      id: 'cargo', name: '짐차', icon: '🚚', color: '#8b5e3c', sibling: 'clean',
+      items: [
+        { id: 'cargo',      name: '카고트럭' },
+        { id: 'container',  name: '컨테이너차' },
+        { id: 'carcarrier', name: '자동차운반차' },
+        { id: 'tanklorry',  name: '탱크로리' },
+        { id: 'tow',        name: '견인차' }
+      ]
+    }),
+    withPhotos({
+      id: 'clean', name: '청소차', icon: '🗑️', color: '#64748b', sibling: 'cargo',
+      items: [
+        { id: 'garbage',    name: '쓰레기차' },
+        { id: 'sweeper',    name: '노면청소차' },
+        { id: 'sprinkler',  name: '살수차' },
+        { id: 'snowplow',   name: '제설차' },
+        { id: 'skiploader', name: '암롤차' }
+      ]
+    }),
+    withPhotos({
+      id: 'car', name: '자동차', icon: '🚗', color: '#2f7fe0', sibling: 'cargo',
       items: [
         { id: 'sedan',      name: '승용차' },
         { id: 'jeep',       name: '지프차' },
@@ -131,7 +173,8 @@
   ];
   var PLACES = {
     sea: PLACE_LIST[0], train: PLACE_LIST[1], car: PLACE_LIST[2],
-    special: PLACE_LIST[3], animal: PLACE_LIST[4]
+    fire: PLACE_LIST[2], cargo: PLACE_LIST[2], clean: PLACE_LIST[2],
+    build: PLACE_LIST[3], farm: PLACE_LIST[4], animal: PLACE_LIST[4]
   };
 
   /* 내 사진 — 부모가 직접 넣은 사진. 이 기기 안에만 있다. */
