@@ -407,8 +407,9 @@
     head.appendChild(el('h1', 'screen-title', '📷 내 사진'));
     app.appendChild(head);
 
-    var note = el('div', 'notice',
-      '넣은 사진은 <b>이 기기에만</b> 저장돼요. 인터넷으로 올라가지 않아요.');
+    var note = el('div', 'notice', Mine.onPi()
+      ? '넣은 사진은 <b>집 라즈베리파이</b>에 저장돼요. 지한이 태블릿에서도 같이 보여요.'
+      : '넣은 사진은 <b>이 기기에만</b> 저장돼요. 인터넷으로 올라가지 않아요.');
     app.appendChild(note);
 
     var picker = el('label', 'add-photo', '➕ 사진 고르기 (여러 장 한 번에)' +

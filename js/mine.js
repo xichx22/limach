@@ -7,6 +7,28 @@
   var DB = 'jihan-photos', STORE = 'items', VER = 1;
   var cache = [];
 
+  /* 파이가 앱을 내려준 경우에만 사진을 파이에 둔다.
+     그러면 기기를 바꿔도, 지한이 태블릿에서도 같은 사진이 보인다.
+
+     깃허브판(github.io)에서는 파이를 부를 수 없다 — 크롬이 공개 주소에 있는
+     페이지가 사설망 부르는 것을 막기 때문이다(2026-09-17 실측). 그래서 거기선
+     예전처럼 이 기기 안에만 저장한다. 두 경우를 여기 한 군데서만 가른다. */
+  var onPi = false;
+
+  function server(path, opt) {
+    return fetch(path, opt).then(function (r) {
+      if (!r.ok) throw new Error('파이가 거절했어 (' + r.status + ')');
+      return r.json();
+    });
+  }
+
+  /* 파이가 준 한 줄을 앱이 쓰는 모양으로. src 는 data URL 대신 주소다 —
+     사진 100장을 전부 data URL 로 들고 있으면 메모리가 남아나지 않는다. */
+  function fromPi(row) {
+    row.src = './api/photos/' + row.file;
+    return row;
+  }
+
   function open() {
     return new Promise(function (ok, no) {
       var r = indexedDB.open(DB, VER);
@@ -31,10 +53,18 @@
   }
 
   function load() {
-    return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
-      cache = (rows || []).sort(function (a, b) { return a.at - b.at; });
+    // 파이가 내려준 앱인지 먼저 물어본다. 실패하면 예전대로 기기 안에서 읽는다.
+    return server('./api/photos').then(function (d) {
+      onPi = true;
+      cache = (d.photos || []).map(fromPi);
       return cache;
-    }).catch(function () { cache = []; return cache; });
+    }).catch(function () {
+      onPi = false;
+      return tx('readonly', function (s) { return s.getAll(); }).then(function (rows) {
+        cache = (rows || []).sort(function (a, b) { return a.at - b.at; });
+        return cache;
+      }).catch(function () { cache = []; return cache; });
+    });
   }
 
   function all() { return cache; }
@@ -45,6 +75,17 @@
     if (meta) for (var k in meta) item[k] = meta[k];
     return detail(dataUrl).then(function (score) {
       item.score = score;
+      if (onPi) {
+        return server('./api/photos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        }).then(function (d) {
+          // 파이가 저장한 모양으로 바꿔 담는다. 보낸 data URL 은 버린다 —
+          // 들고 있어봐야 메모리만 먹고, 이제 진짜는 파이에 있다.
+          item = fromPi(d.photo);
+        });
+      }
       return tx('readwrite', function (s) { return s.put(item); });
     }).then(function () {
       cache.push(item); return item;
@@ -90,6 +131,9 @@
 
   /* 예전에 넣어둔 사진에는 점수가 없다. 한 번 재서 저장해 둔다. */
   function ensureScores() {
+    // 파이에 둘 때는 넣는 순간 점수를 같이 보내므로 뒤늦게 잴 일이 없다.
+    // 여기서 굳이 돌리면 기기 저장소에 엉뚱하게 써버린다.
+    if (onPi) return Promise.resolve();
     var todo = cache.filter(function (x) { return typeof x.score !== 'number'; });
     if (!todo.length) return Promise.resolve();
     return todo.reduce(function (chain, it) {
@@ -110,7 +154,10 @@
   }
 
   function remove(id) {
-    return tx('readwrite', function (s) { return s.delete(id); }).then(function () {
+    var done = onPi
+      ? server('./api/photos/' + encodeURIComponent(id), { method: 'DELETE' })
+      : tx('readwrite', function (s) { return s.delete(id); });
+    return done.then(function () {
       cache = cache.filter(function (x) { return x.id !== id; });
     });
   }
@@ -136,6 +183,10 @@
     });
   }
 
+  /* 사진이 어디 있는지. 화면에 그대로 알려줘야 한다 — 파이에 올라가는데
+     "이 기기에만 저장돼요" 라고 쓰여 있으면 거짓말이 된다. */
+  function onPi_() { return onPi; }
+
   global.Mine = { load: load, all: all, add: add, remove: remove, shrink: shrink,
-                  ensureScores: ensureScores, puzzleOk: puzzleOk };
+                  ensureScores: ensureScores, puzzleOk: puzzleOk, onPi: onPi_ };
 })(window);
