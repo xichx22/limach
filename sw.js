@@ -1,7 +1,7 @@
 /* 오프라인 실행 + 새 버전 바로 받기.
    코드는 인터넷을 먼저 보고(새 버전이 있으면 바로 반영), 사진은 저장해둔 걸 먼저 쓴다.
    전부 저장해둔 걸 먼저 쓰면 앱을 고쳐도 폰에 옛날 화면이 계속 남는다. */
-var CACHE = 'jihan-play-v11';
+var CACHE = 'jihan-play-v12';
 var SHELL = [
   './', './index.html', './manifest.webmanifest',
   './css/style.css',
@@ -34,7 +34,11 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+/* 받아온 걸 저장해둔다. 단, 제대로 온 것만 저장한다.
+   404 나 오류 화면까지 저장해버리면, 사진 이름을 바꾼 날
+   폰에 '없음'이 영영 저장돼서 사진이 계속 깨진 채로 남는다. */
 function put(req, res) {
+  if (!res || !res.ok) return res;
   var copy = res.clone();
   caches.open(CACHE).then(function (c) { c.put(req, copy); });
   return res;

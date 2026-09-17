@@ -58,8 +58,23 @@
 <script>
   Engine.boot();
   if ('serviceWorker' in navigator) {
+    /* updateViaCache: 'none' — 폰이 sw.js 마저 저장해두면
+       고친 걸 올려도 며칠씩 옛날 앱이 뜬다. 이 파일만은 늘 새로 받는다. */
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('sw.js').catch(function () { /* 무시 */ });
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+        .catch(function () { /* 무시 */ });
+    });
+    /* 새 판이 올라오면 화면을 한 번 새로 고친다.
+       안 그러면 새 코드와 옛날 화면이 섞여서 사진이 깨진 채로 보인다.
+       처음 설치될 때도 이 일이 일어나는데, 그때는 이미 새 화면이므로
+       새로고침하면 안 된다 — 놀던 게 끊긴다.
+       reloaded 로 막지 않으면 새로고침이 끝없이 반복된다. */
+    var hadWorker = !!navigator.serviceWorker.controller;
+    var reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadWorker || reloaded) return;
+      reloaded = true;
+      location.reload();
     });
   }
 </script>
