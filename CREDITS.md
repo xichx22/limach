@@ -6,7 +6,7 @@
 > 앱의 `내 사진` 기능으로 직접 넣은 사진은 이 목록에 없다.
 > 그 사진들은 기기 안에만 저장되고 저장소에 올라가지 않는다.
 
-사진 106장
+사진 101장
 
 | 사진 | 원저작자 | 라이선스 | 원본 |
 |---|---|---|---|
@@ -26,7 +26,6 @@
 | 고래 | Jérémie Silvestro (If you can improve this photo development, ask me t | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Baleine_%C3%A0_bosse_et_son_baleineau_2.jpg) |
 | 고소작업차 | Dwight Burdette | CC BY 3.0 | [원본](https://commons.wikimedia.org/wiki/File%3AAerial_work_platform_at_Shapiro_Science_Library%2C_919_South_University_Street%2C_Ann_Arbor%2C_Michigan_-_panoramio.jpg) |
 | 고슴도치 | 알 수 없음 | Attribution | [원본](https://commons.wikimedia.org/wiki/File:Erinaceus_amurensis.jpg) |
-| 공사장 | Whiteghost.ink | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Construction_site_in_Cologne,_Germany_(2017).jpg) |
 | 공항소방차 | Globetrotter19 | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File%3AFlugfeldl%C3%B6schfahrzeug_Rosenbauer_Panther_Foam_10%2C_Tag_der_Feuerwehr%2C_2024_Stadtw%C3%A4ldchen.jpg) |
 | 구급차 | 어썰트 | CC0 | [원본](https://commons.wikimedia.org/wiki/File:%EC%8B%AC%ED%94%8C%ED%95%9C_%EA%B5%AC%EA%B8%89%EC%B0%A8.jpg) |
 | 굴착기 | High Contrast | CC BY 3.0 de | [원본](https://commons.wikimedia.org/wiki/File:Poclain_excavator_in_Syria.JPG) |
@@ -40,7 +39,6 @@
 | 노면청소차 | Windmemories | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File%3A20240723_Street_sweeper_truck_on_Yingbin_Road.jpg) |
 | 누리로 | 알 수 없음 | 출처 표기 필요 | [원본](https://commons.wikimedia.org/wiki/File:Nooriro.jpg) |
 | 덤프트럭 | High Contrast | CC BY 3.0 de | [원본](https://commons.wikimedia.org/wiki/File:Mercedes-Benz_Arocs_-_dump_truck_version_(1).JPG) |
-| 도로 | Quevaal | CC BY-SA 2.5 | [원본](https://commons.wikimedia.org/wiki/File:Ring_3_and_E6_Oslo_Quevaal.jpg) |
 | 도로포장차 | Fscarfia06 | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File%3ACaterpillar_AP600.jpg) |
 | 돌고래 | U.S. Navy photo by Photographer's Mate 1st Class Brien Aho. | Public domain | [원본](https://commons.wikimedia.org/wiki/File:NMMP_dolphin_with_locator.jpeg) |
 | 레미콘 | Billbeee at English Wikipedia | CC BY 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Large-transit-mixer.jpg) |
@@ -50,7 +48,6 @@
 | 문어 | albert kok | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Octopus2.jpg) |
 | 물개 | Liam Quinn from Canada | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File:Antarctic_Fur_Seals_at_Stromness_(5717320163).jpg) |
 | 물탱크차 | Tiia Monto | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File%3AFire_truck_in_Vaajakoski.jpg) |
-| 바다 | kallerna | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Atlantic_near_Faroe_Islands.jpg) |
 | 바다거북 | Brocken Inaglory | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Hawaii_turtle_2.JPG) |
 | 바닷가재 | Roberto Rodríguez | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Bugre_americanu.jpg) |
 | 배 | Corey Seeman | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Icon_of_the_Seas_Puerto_Rico_2025_(cropped).jpg) |
@@ -92,8 +89,6 @@
 | 지게차 | Park taeho | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:-51wiki.jpg) |
 | 지프차 | Damian B Oh | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Kia_Sportage_1.6T_2WD_Signature_NQ5_PE_Snow_White_Pearl_(3).jpg) |
 | 지하철 | Mtattrain | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:Seoul_Metro_Line_2_train_arriving_at_Guro_Digital_Complex_(2-09).jpg) |
-| 철길 | Dietmar Rabich | CC BY-SA 4.0 | [원본](https://commons.wikimedia.org/wiki/File:D%C3%BClmen,_B%C3%B6rnste,_Eisenbahnlinie_Dortmund-Enschede_--_2015_--_9918.jpg) |
-| 초원 | No machine-readable author provided. Kgwo1972 assumed (based on copyri | Public domain | [원본](https://commons.wikimedia.org/wiki/File:Konza1.jpg) |
 | 카고트럭 | Lav Ulv from Viby J, Denmark | CC BY 2.0 | [원본](https://commons.wikimedia.org/wiki/File%3AAT96809_%2817.05.02%2C_Motorvej_501%2C_Viby%29DSC_5957_Balancer_%2826623605169%29.jpg) |
 | 캥거루 | 알 수 없음 | CC BY-SA 3.0 | [원본](https://commons.wikimedia.org/wiki/File:Kangaroo1.jpg) |
 | 컨테이너차 | Bob Adams from Amanzimtoti, South Africa | CC BY-SA 2.0 | [원본](https://commons.wikimedia.org/wiki/File%3ACargo_Service_Center_Mercedes_Benz_2535_%2840425296621%29.jpg) |
