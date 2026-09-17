@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파이 연결 진단</title>
+<style>
+  body{font:15px/1.6 system-ui,"Noto Sans KR",sans-serif;margin:0;padding:16px;
+       max-width:700px;margin:0 auto;background:#14171a;color:#e8eaed}
+  h1{font-size:19px}
+  input{width:100%;padding:10px;font:inherit;border-radius:8px;border:1px solid #3a4148;
+        background:#1c2024;color:#e8eaed;box-sizing:border-box}
+  button{font:inherit;padding:10px 16px;border-radius:8px;border:1px solid #3a4148;
+         background:#2563eb;color:#fff;margin-top:10px;cursor:pointer}
+  .row{border:1px solid #2c3238;border-radius:10px;padding:12px;margin:10px 0;background:#1c2024}
+  .t{font-weight:600;margin-bottom:4px}
+  .ok{color:#4ade80} .bad{color:#f87171} .wait{color:#9aa3ad}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0;color:#9aa3ad}
+</style>
+</head>
+<body>
+
+<h1>파이 연결 진단</h1>
+<p>앱이 파이에 못 닿는 이유를 가른다. 주소를 넣고 누르면 세 가지를 따로 해본다.</p>
+
+<!-- 주소는 공개 저장소에 박아두지 않는다. 처음 한 번만 넣으면 기기에 기억된다. -->
+<input id="url" placeholder="https://○○○.ts.net 형태로" autocapitalize="off" spellcheck="false">
+<button onclick="run()">검사 시작</button>
+
+<div id="out"></div>
+
+<script>
+/*
+ * 셋을 따로 해보는 이유 — 어디서 막히는지 갈라내려는 것이다.
+ *
+ *  1. 헤더 없는 GET : 브라우저가 사전확인(preflight) 없이 바로 보낸다.
+ *  2. 헤더 붙은 GET : 앱이 실제로 쓰는 방식. Content-Type 때문에 사전확인이 먼저 간다.
+ *  3. 이미지 태그   : fetch 가 아닌 경로. CORS 규칙을 안 탄다.
+ *
+ * 1만 되고 2가 안 되면 사전확인이 막힌 것이고,
+ * 셋 다 안 되면 네트워크나 사설망 정책 자체가 막는 것이다.
+ */
+const out = document.getElementById('out')
+
+function card(title) {
+  const d = document.createElement('div')
+  d.className = 'row'
+  d.innerHTML = `<div class="t">${title}</div><div class="wait">해보는 중…</div>`
+  out.appendChild(d)
+  return {
+    ok: (m) => { d.children[1].className = 'ok'; d.children[1].textContent = '✅ ' + m },
+    bad: (m, detail) => {
+      d.children[1].className = 'bad'
+      d.children[1].textContent = '❌ ' + m
+      if (detail) { const p = document.createElement('pre'); p.textContent = detail; d.appendChild(p) }
+    },
+  }
+}
+
+async function run() {
+  out.innerHTML = ''
+  const base = document.getElementById('url').value.trim().replace(/\/+$/, '')
+  if (!base) { alert('주소를 넣어줘'); return }
+
+  document.getElementById('url').blur()
+
+  const c0 = card('0. 이 페이지의 출처')
+  c0.ok(`${location.origin} — ${location.protocol === 'https:' ? 'https (안전)' : 'http'}`)
+
+  const c1 = card('1. 헤더 없는 GET (사전확인 없음)')
+  try {
+    const r = await fetch(`${base}/health`)
+    c1.ok(`HTTP ${r.status} · ${(await r.text()).slice(0, 80)}`)
+  } catch (e) {
+    c1.bad('fetch 실패', `${e.name}: ${e.message}`)
+  }
+
+  const c2 = card('2. 헤더 붙은 GET (앱이 쓰는 방식 · 사전확인 먼저 감)')
+  try {
+    const r = await fetch(`${base}/health`, { headers: { 'Content-Type': 'application/json' } })
+    c2.ok(`HTTP ${r.status} · ${(await r.text()).slice(0, 80)}`)
+  } catch (e) {
+    c2.bad('fetch 실패', `${e.name}: ${e.message}`)
+  }
+
+  const c3 = card('3. 이미지 태그 (CORS 규칙을 안 탐)')
+  await new Promise((done) => {
+    const img = new Image()
+    const timer = setTimeout(() => { c3.bad('10초 안에 응답 없음'); done() }, 10000)
+    img.onload = () => { clearTimeout(timer); c3.ok('불러옴'); done() }
+    // /health 는 이미지가 아니라 반드시 onerror 로 온다. 여기서 보려는 건
+    // "이미지로 읽혔나" 가 아니라 "파이까지 닿았나" 다 — 파이 로그를 같이 보면
+    // 닿았는지 아닌지가 갈린다.
+    img.onerror = () => {
+      clearTimeout(timer)
+      c3.bad('못 불러옴 (파이 로그에 요청이 찍혔는지 같이 봐야 함)')
+      done()
+    }
+    img.src = `${base}/health?img=1&t=${Date.now()}`
+  })
+
+  card('끝났다').ok('이 화면을 그대로 캡처해서 보여줘')
+}
+
+// 주소를 붙여넣기 쉽게, 한 번 넣으면 기억한다
+const box = document.getElementById('url')
+box.value = localStorage.getItem('diagUrl') || ''
+box.addEventListener('change', () => localStorage.setItem('diagUrl', box.value))
+</script>
+</body>
+</html>
