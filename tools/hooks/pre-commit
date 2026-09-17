@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# 커밋할 때마다 sw.js 를 맞춘다.
+#
+# 사진을 바꿔놓고 버전을 안 올리면 폰에는 옛날 사진이 영영 남는다
+# (sw.js 가 /img/ 는 저장해둔 걸 먼저 쓰기 때문). 이걸 사람이 매번
+# 기억하는 대신 여기서 자동으로 한다.
+#
+# 이 훅은 tools/hooks/ 에 있고 저장소에 같이 들어간다
+# (git config core.hooksPath tools/hooks). .git/hooks 에 두면
+# 다시 clone 했을 때 사라진다.
+set -euo pipefail
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+# 폰에 내려가는 파일이 바뀌었을 때만 손댄다. README 만 고친 커밋에서
+# 버전을 올리면 폰이 6MB 를 공연히 다시 받는다.
+CHANGED=$(git diff --cached --name-only --diff-filter=ACMR \
+          -- img css js index.html manifest.webmanifest icon-192.png icon-512.png)
+
+[ -n "$CHANGED" ] || exit 0
+
+OUT=$(python3 tools/sw-update.py --bump) || {
+  echo "sw.js 갱신 실패 — 커밋을 멈춘다"; exit 1
+}
+
+# 훅이 고친 sw.js 도 이번 커밋에 같이 들어가야 한다.
+git add sw.js
+[ -n "$OUT" ] && echo "$OUT"
+exit 0
