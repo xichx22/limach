@@ -284,6 +284,7 @@ Engine.register({
         node.setPointerCapture && node.setPointerCapture(e.pointerId);
         document.addEventListener('pointermove', move);
         document.addEventListener('pointerup', up);
+        document.addEventListener('pointercancel', up);
       }
       function move(e) {
         if (!moved && Math.abs(e.clientX - startX) + Math.abs(e.clientY - startY) < 8) return;
@@ -300,9 +301,10 @@ Engine.register({
       function up(e) {
         document.removeEventListener('pointermove', move);
         document.removeEventListener('pointerup', up);
+        document.removeEventListener('pointercancel', up);
         node.classList.remove('lifted');
         if (ghostEl) { ghostEl.remove(); ghostEl = null; }
-        if (!moved) return;                    // 그냥 눌렀다 뗀 것 = 고르기
+        if (!moved || e.type === 'pointercancel') return;   // 그냥 눌렀다 뗀 것 = 고르기
         var el = document.elementFromPoint(e.clientX, e.clientY);
         var slot = el && el.closest && el.closest('.jig-slot');
         if (slot) tryPlace(+slot.dataset.slot);

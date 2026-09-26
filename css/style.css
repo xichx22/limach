@@ -275,7 +275,7 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 @keyframes pop-away{ 40%{ transform: scale(1.45); opacity:.85; } 100%{ transform: scale(1.9); opacity:0; } }
 
 /* ---------------- 🔦 손전등 ---------------- */
-.torch-stage{ position:relative; width:100%; display:flex; justify-content:center; }
+.torch-stage{ position:relative; width:100%; display:flex; justify-content:center; touch-action:none; }
 .torch-dark{
   position:absolute; inset:-14px; pointer-events:none; border-radius:18px;
   background: radial-gradient(circle var(--beam, 110px) at var(--x, 50%) var(--y, 50%),

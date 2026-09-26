@@ -45,18 +45,30 @@ Engine.register({
     ctx.root.appendChild(stage);
 
     function moveLight(e) {
-      var r = stage.getBoundingClientRect();
+      /* 막(.torch-dark)은 무대보다 14px 크게 깔린다(inset:-14px). 무대 기준으로
+         재면 빛이 손가락보다 왼쪽 위로 14px 어긋난다 — 막 자신을 기준으로 잰다 */
+      var r = dark.getBoundingClientRect();
       var x = (e.clientX != null ? e.clientX : r.left + r.width / 2) - r.left;
       var y = (e.clientY != null ? e.clientY : r.top + r.height / 2) - r.top;
       dark.style.setProperty('--x', x + 'px');
       dark.style.setProperty('--y', y + 'px');
     }
 
-    /* 빈 곳을 눌러도 손전등이 따라간다 */
-    stage.addEventListener('pointerdown', moveLight);
+    /* 빈 곳을 눌러도, 누른 채 끌어도 손전등이 따라간다 */
+    var lighting = false;
+    stage.addEventListener('pointerdown', function (e) { lighting = true; moveLight(e); });
+    stage.addEventListener('pointermove', function (e) { if (lighting) moveLight(e); });
+    function lightOff() { lighting = false; }
+    document.addEventListener('pointerup', lightOff);
+    document.addEventListener('pointercancel', lightOff);
 
-    setTimeout(function () {
+    var t0 = setTimeout(function () {
       ctx.say(ctx.spoken(target) + ', 손전등으로 찾아봐');
     }, 250);
+    return function () {
+      clearTimeout(t0);
+      document.removeEventListener('pointerup', lightOff);
+      document.removeEventListener('pointercancel', lightOff);
+    };
   }
 });

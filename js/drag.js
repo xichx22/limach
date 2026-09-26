@@ -28,6 +28,7 @@
       if (opts.onPick) opts.onPick(opts.id);
       document.addEventListener('pointermove', move);
       document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', up);
     }
     function move(e) {
       if (!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) < 8) return;
@@ -45,9 +46,11 @@
     function up(e) {
       document.removeEventListener('pointermove', move);
       document.removeEventListener('pointerup', up);
+      document.removeEventListener('pointercancel', up);
       node.classList.remove('lifted');
       if (flying) { flying.remove(); flying = null; }
-      if (!moved) return;                       // 그냥 누른 것 = 고르기
+      /* 전화·알림 등으로 제스처가 끊기면 놓은 것으로 치지 않는다 */
+      if (!moved || e.type === 'pointercancel') return;   // 그냥 누른 것 = 고르기
       var el = document.elementFromPoint(e.clientX, e.clientY);
       var drop = el && el.closest && el.closest(opts.dropSelector);
       if (drop) opts.onDrop(drop, opts.id);

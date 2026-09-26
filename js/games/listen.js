@@ -22,7 +22,7 @@ Engine.register({
     var bar = ctx.el('div', 'tool-bar');
     var again = ctx.el('button', 'tool-btn', '🔊 다시 들려줘');
     again.type = 'button';
-    again.addEventListener('click', function () { ctx.say(target.name + ', 어디 있어?'); });
+    again.addEventListener('click', function () { ctx.say(said + ', 어디 있어?'); });
     bar.appendChild(again);
     ctx.root.appendChild(bar);
 

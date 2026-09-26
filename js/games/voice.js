@@ -11,7 +11,7 @@ Engine.register({
 
   round: function (ctx) {
     var item = ctx.one(ctx.theme.items);
-    var rec = null, chunks = [], url = null, timer = null;
+    var rec = null, chunks = [], url = null, timer = null, gone = false;
 
     ctx.ask('따라 해봐!', item.name);
 
@@ -64,6 +64,12 @@ Engine.register({
 
     mic.addEventListener('click', function () {
       if (rec && rec.state === 'recording') { stop(); return; }
+      /* 마이크는 https(또는 localhost)에서만 열린다. http://100.x:8811 로 열면
+         브라우저가 mediaDevices 자체를 숨겨서 '지원 안 함' 처럼 보인다 */
+      if (!window.isSecureContext) {
+        note.innerHTML = '녹음은 https 주소에서만 돼요.<br>https://xichx.tail433939.ts.net/playground/ 로 열어주세요.';
+        return;
+      }
       if (!navigator.mediaDevices || !window.MediaRecorder) {
         note.innerHTML = '이 브라우저는 녹음을 지원하지 않아요.';
         return;
@@ -74,7 +80,7 @@ Engine.register({
         rec.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
         rec.onstop = function () {
           finish(stream);
-          if (!chunks.length) return;
+          if (gone || !chunks.length) return;   // 녹음 중에 다음으로 넘어갔으면 틀지 않는다
           if (url) URL.revokeObjectURL(url);
           url = URL.createObjectURL(new Blob(chunks, { type: chunks[0].type || 'audio/webm' }));
           play.disabled = false;
@@ -98,6 +104,7 @@ Engine.register({
     setTimeout(function () { ctx.say(ctx.spoken(item) + '. 따라 해봐'); }, 300);
 
     return function () {
+      gone = true;
       stop();
       if (url) URL.revokeObjectURL(url);
     };
