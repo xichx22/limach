@@ -15,6 +15,7 @@ Engine.register({
     var lv = ctx.level();
     var FIRES = [3, 5, 7][lv];
     var NEED = [0.7, 1.0, 1.3][lv];     // 불 하나를 끄는 데 드는 물 뿌린 시간(초)
+    var GRAV = 600;                     // 물방울이 처지는 정도(px/s²)
     var REACH = 70;                     // 손가락에서 이만큼 안의 불이 물을 맞는다(px)
 
     var truck = ctx.one(ctx.theme.items);
@@ -81,10 +82,11 @@ Engine.register({
         var o = nozzle();
         for (var k = 0; k < 4; k++) {
           var sp = 0.9 + Math.random() * 0.25;
+          /* 0.6초 만에 손가락에 닿는 속도로 쏘고, 중력으로 처지는 만큼 조금 위로 겨눈다 */
           drops.push({
             x: o.x, y: o.y, life: 0,
-            vx: (aim.x - o.x) * sp + (Math.random() - 0.5) * 30,
-            vy: (aim.y - o.y) * sp + (Math.random() - 0.5) * 30
+            vx: (aim.x - o.x) / 0.6 * sp + (Math.random() - 0.5) * 40,
+            vy: (aim.y - o.y) / 0.6 * sp - GRAV * 0.3 + (Math.random() - 0.5) * 40
           });
         }
         fires.forEach(function (f) {
@@ -102,9 +104,11 @@ Engine.register({
       g.fillStyle = 'rgba(80,160,255,.75)';
       drops = drops.filter(function (d) {
         d.life += dt;
-        d.x += d.vx * dt * 1.6;
-        d.y += d.vy * dt * 1.6 + d.life * d.life * 120;
-        if (d.life > 0.7) return false;
+        /* 예전엔 중력을 위치에 매 프레임 더해서 물이 뻗기도 전에 떨어졌다(2026-09-29) */
+        d.vy += GRAV * dt;
+        d.x += d.vx * dt;
+        d.y += d.vy * dt;
+        if (d.life > 0.75) return false;
         g.beginPath();
         g.arc(d.x, d.y, 5 + d.life * 7, 0, Math.PI * 2);
         g.fill();

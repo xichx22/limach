@@ -963,3 +963,9 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
   width:58px; height:58px; border-radius:14px; background:#fff; font-size:32px; color:#cc3d1f;
   box-shadow: 0 4px 0 #e3cdb5;
 }
+
+/* 어두운 모드 '지원' 선언 — index.html 의 color-scheme 주석 참고.
+   아이 앱이라 밤에도 같은 밝은 색을 쓴다. 이 규칙이 있어야 브라우저가 강제로 어둡게 바꾸지 않는다. */
+@media (prefers-color-scheme: dark){
+  html, body{ background:#fff6e0; color: var(--ink); }
+}
