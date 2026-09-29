@@ -740,3 +740,159 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; }
 }
+
+/* ================= 2026-09-29 새 놀이 · 공통 반응 ================= */
+
+/* 맞히면 탈것이 화면 아래를 달려 지나간다 */
+.driveby{
+  position:absolute; bottom: calc(var(--bottom) + 18px); left:0;
+  width: min(34vw, 170px); display:flex; align-items:center;
+  animation: drive-by 2.1s cubic-bezier(.45,.05,.55,.95) forwards;
+}
+.driveby .art-photo img{ border-radius:20px; box-shadow:0 8px 18px rgba(0,0,0,.25); aspect-ratio:1/1; }
+.driveby .puff{ position:absolute; left:-44px; bottom:4px; font-size:40px; animation: puff .3s ease-in-out infinite alternate; }
+@keyframes drive-by{
+  0%{ transform: translateX(-45vw) translateY(0); }
+  25%{ transform: translateX(10vw) translateY(-4px); }
+  50%{ transform: translateX(45vw) translateY(0); }
+  75%{ transform: translateX(80vw) translateY(-4px); }
+  100%{ transform: translateX(130vw) translateY(0); }
+}
+@keyframes puff{ from{ opacity:.4; transform: scale(.8); } to{ opacity:.9; transform: scale(1.15); } }
+
+/* 두 번 틀리면 정답이 반짝인다 */
+.tile.hint{ animation: hint 1s ease-in-out infinite; box-shadow: 0 0 0 5px #ffd23f, 0 5px 0 rgba(0,0,0,.09); }
+@keyframes hint{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.07); } }
+
+/* ---------- 🧯 불 끄기 ---------- */
+.fire-scene{
+  position:relative; flex:1; width:100%; min-height:340px; overflow:hidden;
+  border-radius: var(--r); touch-action:none;
+  background: linear-gradient(180deg, #ffb37a 0%, #ffd9a8 55%, #9ccf6a 56%, #7bb54c 100%);
+}
+.fire-town{
+  position:absolute; left:0; right:0; top:22%; display:flex; justify-content:space-around;
+  font-size: min(20vw, 120px); line-height:1; pointer-events:none;
+}
+.fire-water{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3; }
+.flame{
+  --s:1; position:absolute; z-index:2; pointer-events:none;
+  font-size: min(15vw, 84px); line-height:1;
+  transform: translate(-50%,-50%) scale(var(--s));
+  animation: flicker .5s ease-in-out infinite alternate;
+  transition: transform .15s linear;
+}
+.flame.smoke{ animation: smoke .9s ease-out forwards; }
+@keyframes flicker{
+  from{ filter: brightness(1); margin-top:0; }
+  to{ filter: brightness(1.25); margin-top:-4px; }
+}
+@keyframes smoke{ to{ opacity:0; margin-top:-60px; } }
+.fire-truck{
+  position:absolute; left:4%; bottom:3%; width: min(36vw, 190px); z-index:4; pointer-events:none;
+  animation: roll-in .9s ease-out both;
+}
+.fire-truck .art-photo img{ border-radius:18px; box-shadow:0 6px 16px rgba(0,0,0,.25); aspect-ratio:1/1; }
+@keyframes roll-in{ from{ transform: translateX(-120%); } to{ transform: translateX(0); } }
+
+/* ---------- 🧽 세차장 ---------- */
+.wash-box{
+  position:relative; width: min(88vw, 62vh, 460px); aspect-ratio:1/1;
+  border-radius:26px; overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.18);
+  background:#dfe8ee;
+}
+.wash-box .art-photo, .wash-box .art-photo img{ width:100%; height:100%; border-radius:0; }
+.wash-dirt{ position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:pointer; }
+.wash-box.shine::after{
+  content:'✨'; position:absolute; inset:0; display:grid; place-items:center;
+  font-size: min(30vw, 160px); animation: sparkle 1s ease-out forwards; pointer-events:none;
+}
+@keyframes sparkle{ 0%{ opacity:0; transform: scale(.4) rotate(-20deg); } 50%{ opacity:1; } 100%{ opacity:0; transform: scale(1.3) rotate(15deg); } }
+
+/* ---------- 🏗️ 공사장 ---------- */
+.dig-site{
+  position:relative; flex:1; width:100%; min-height:360px; overflow:hidden; touch-action:none;
+  border-radius: var(--r);
+  background: linear-gradient(180deg, #bfe3ff 0%, #e6f4ff 42%, #d9b27c 43%, #c79a5f 100%);
+}
+.dig-piles{ position:absolute; left:3%; bottom:5%; width:54%; display:flex; align-items:flex-end; gap:3%; }
+.dig-pile{
+  --k:1; flex:1; aspect-ratio: 1/1.05; border-radius: 50% 50% 8px 8px / 100% 100% 8px 8px;
+  background: radial-gradient(circle at 40% 35%, #9a6a3a, #6d4522 70%);
+  transform-origin: bottom center; transform: scaleY(var(--k)) scaleX(calc(.6 + .4 * var(--k)));
+  transition: transform .35s ease; box-shadow: 0 4px 0 rgba(0,0,0,.15);
+}
+.dig-pile.empty{ opacity:.25; }
+.dig-truck{
+  --fill:0; position:absolute; right:3%; bottom:5%; width: min(40vw, 220px);
+  display:flex; flex-direction:column; gap:6px; align-items:center;
+}
+.dig-truck .art-photo img{ border-radius:18px; box-shadow:0 6px 16px rgba(0,0,0,.25); aspect-ratio:1/1; }
+.dig-load{ width:90%; height:18px; border-radius:9px; background:rgba(255,255,255,.7); overflow:hidden; box-shadow: inset 0 0 0 2px #6d4522; }
+.dig-load i{ display:block; height:100%; width: calc(var(--fill) * 100%); background:#8a5a2e; transition: width .4s ease; }
+.dig-truck.bump{ animation: bump .4s ease; }
+.dig-truck.leave{ animation: leave 1.6s ease-in forwards; }
+@keyframes bump{ 30%{ transform: translateY(8px); } 60%{ transform: translateY(-4px); } }
+@keyframes leave{ 20%{ transform: translateX(-10px); } 100%{ transform: translateX(120vw); } }
+.dig-arm{
+  position:absolute; left:50%; top:50%; width: min(26vw, 130px); z-index:5;
+  transform: translate(-50%,-50%); cursor:grab; touch-action:none;
+}
+.dig-arm .art-photo img{ border-radius:50%; aspect-ratio:1/1; border:5px solid #eab308; box-shadow:0 8px 18px rgba(0,0,0,.3); }
+.dig-arm.held{ transform: translate(-50%,-50%) scale(1.12); cursor:grabbing; }
+.dig-scoop{
+  position:absolute; right:-8%; bottom:-6%; width:44%; aspect-ratio:1/1; border-radius:50%;
+  background:#eab308; border:4px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.25);
+  display:grid; place-items:center; font-size: min(7vw, 34px);
+}
+.dig-scoop::after{ content:'🪣'; }
+.dig-arm.full .dig-scoop{ background:#6d4522; }
+.dig-arm.full .dig-scoop::after{ content:'🟤'; }
+
+/* ---------- 🚦 신호등 운전 ---------- */
+.sig-wrap{ position:relative; flex:1; width:100%; display:flex; flex-direction:column; gap:12px; align-items:center; }
+.sig-track{
+  position:relative; width:100%; height:44px; border-radius:22px; background:#fff;
+  box-shadow: inset 0 0 0 3px #e5d6c3;
+}
+.sig-me{ position:absolute; left:0; top:-6px; width:56px; transition: left .1s linear; }
+.sig-me .art-photo img{ border-radius:50%; aspect-ratio:1/1; border:3px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+.sig-flag{ position:absolute; right:6px; top:2px; font-size:32px; }
+.sig-light{
+  display:flex; gap:12px; padding:10px 16px; border-radius:20px; background:#2d2d2d;
+  box-shadow:0 6px 0 #111;
+}
+.sig-light i{ width: min(15vw, 64px); aspect-ratio:1/1; border-radius:50%; background:#555; transition: background .15s, box-shadow .15s; }
+.sig-light.on-r .r{ background:#ff3b30; box-shadow:0 0 24px #ff3b30; }
+.sig-light.on-y .y{ background:#ffcc00; box-shadow:0 0 24px #ffcc00; }
+.sig-light.on-g .g{ background:#34c759; box-shadow:0 0 24px #34c759; }
+.sig-road{
+  position:relative; width:100%; flex:1; min-height:170px; border-radius: var(--r);
+  background-color:#6b6b6b;
+  background-image: linear-gradient(90deg, #fff 0 50%, transparent 50% 100%);
+  background-size: 90px 8px; background-repeat: repeat-x; background-position: 0 50%;
+  display:grid; place-items:center; overflow:hidden;
+}
+.sig-car{ --bounce:0; width: min(42vw, 200px); animation: carbob .35s ease-in-out infinite alternate; animation-play-state: running; }
+.sig-car .art-photo img{ border-radius:20px; aspect-ratio:1/1; box-shadow:0 8px 16px rgba(0,0,0,.35); }
+.sig-car{ transform: translateY(calc(var(--bounce) * -3px)); }
+.sig-car.stop{ animation: shake .45s ease; }
+@keyframes carbob{ from{ margin-top:0; } to{ margin-top: calc(var(--bounce) * 6px); } }
+.sig-pedal{
+  width: min(70vw, 340px); padding: 22px 0; border-radius:999px;
+  background:#34c759; color:#fff; font-size: clamp(26px, 7vw, 40px);
+  box-shadow: 0 9px 0 #23913f, 0 14px 24px rgba(0,0,0,.18);
+  touch-action:none; -webkit-touch-callout:none;
+}
+.sig-pedal.down{ transform: translateY(7px); box-shadow: 0 2px 0 #23913f; }
+
+/* ---------- 🃏 짝 맞추기 ---------- */
+.mem-card{ perspective: 600px; }
+.mem-back{
+  position:absolute; inset:0; border-radius: var(--r);
+  display:grid; place-items:center; font-size: calc(var(--cell, 100px) * 0.4); color:#fff;
+  background: linear-gradient(150deg, #ffb347, #ff7b54);
+  transition: opacity .2s ease;
+}
+.mem-card.open .mem-back{ opacity:0; pointer-events:none; }
+.mem-card.done{ box-shadow: 0 0 0 4px #48c774 inset, 0 5px 0 rgba(0,0,0,.09); }

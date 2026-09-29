@@ -115,7 +115,104 @@
     tone(freq * 2, (dur || 0.55) * 0.5, 'sine', 0, 0.06);
   }
 
+  /* ---------- 탈것 효과음 (파일 없이 합성) ---------- */
+
+  /* 삐뽀삐뽀 — 두 음을 번갈아 */
+  function siren(times) {
+    for (var i = 0; i < (times || 3) * 2; i++) {
+      tone(i % 2 ? 660 : 880, 0.34, 'triangle', i * 0.36, 0.13);
+    }
+  }
+
+  /* 빵빵 */
+  function horn() {
+    [0, 0.28].forEach(function (d) {
+      tone(349, 0.2, 'square', d, 0.07);
+      tone(440, 0.2, 'square', d, 0.05);
+    });
+  }
+
+  /* 칙칙폭폭 뒤에 뿌우 */
+  function whistle() {
+    tone(587, 0.7, 'sine', 0, 0.12);
+    tone(740, 0.7, 'sine', 0, 0.08);
+  }
+
+  /* 백색소음 한 토막 (물·흙·문지르기 소리의 재료) */
+  var noiseBuf = null;
+  function noiseBuffer() {
+    if (!ctx) return null;
+    if (noiseBuf) return noiseBuf;
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    var d = noiseBuf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return noiseBuf;
+  }
+
+  /* 짧은 소음: 흙 퍼기(낮게)·문지르기(높게) */
+  function burst(freq, dur, peak) {
+    var buf = noiseBuffer();
+    if (!buf) return;
+    var t0 = ctx.currentTime;
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    var f = ctx.createBiquadFilter();
+    f.type = 'bandpass'; f.frequency.value = freq || 800; f.Q.value = 0.8;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(peak || 0.25, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + (dur || 0.25));
+    src.connect(f).connect(g).connect(ctx.destination);
+    src.start(t0);
+    src.stop(t0 + (dur || 0.25) + 0.05);
+  }
+
+  /* 켜고 끄는 긴 소리: 물 뿌리기('water')·엔진('engine').
+     같은 이름으로 다시 켜면 무시하고, off 로 끈다. */
+  var loops = {};
+  function loop(name, on) {
+    if (!ctx) return;
+    if (!on) {
+      var l = loops[name];
+      if (l) {
+        l.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.05);
+        (function (x) { setTimeout(function () { try { x.src.stop(); } catch (e) {} }, 300); })(l);
+        delete loops[name];
+      }
+      return;
+    }
+    if (loops[name]) return;
+    var g = ctx.createGain();
+    g.gain.value = 0.0001;
+    var src;
+    if (name === 'engine') {
+      src = ctx.createOscillator();
+      src.type = 'sawtooth'; src.frequency.value = 58;
+      var lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = 9; lg.gain.value = 10;
+      lfo.connect(lg).connect(src.frequency); lfo.start();
+      var lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 420;
+      src.connect(lp).connect(g);
+      g.gain.setTargetAtTime(0.12, ctx.currentTime, 0.08);
+      src.onended = function () { try { lfo.stop(); } catch (e) {} };
+    } else {
+      src = ctx.createBufferSource();
+      src.buffer = noiseBuffer(); src.loop = true;
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 2400; bp.Q.value = 0.6;
+      src.connect(bp).connect(g);
+      g.gain.setTargetAtTime(0.16, ctx.currentTime, 0.05);
+    }
+    g.connect(ctx.destination);
+    src.start();
+    loops[name] = { src: src, g: g };
+  }
+
+  function stopLoops() { Object.keys(loops).forEach(function (k) { loop(k, false); }); }
+
   function stop() {
+    stopLoops();
     if (global.speechSynthesis) {
       try { global.speechSynthesis.cancel(); } catch (e) { /* 무시 */ }
     }
@@ -130,6 +227,11 @@
     wrong: wrong,
     levelUp: levelUp,
     stop: stop,
+    siren: siren,
+    horn: horn,
+    whistle: whistle,
+    burst: burst,
+    loop: loop,
     canSpeakKorean: canSpeakKorean
   };
 })(window);

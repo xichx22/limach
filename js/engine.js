@@ -134,11 +134,30 @@
     }
   }
 
+  /* 탈것 주제 — 맞히면 그 탈것이 소리를 내며 화면 아래를 달려 지나간다 */
+  var VEHICLE = { fire: 1, build: 1, farm: 1, cargo: 1, clean: 1, car: 1, train: 1 };
+  var SIREN = { pumper: 1, ladder: 1, watertank: 1, wildfire: 1, airport: 1, police: 1, ambulance: 1 };
+
+  function vehicleSound(themeId, item) {
+    if (SIREN[item.id]) Sound.siren(2);
+    else if (themeId === 'train') Sound.whistle();
+    else Sound.horn();
+  }
+
+  function driveBy(item, themeId) {
+    if (!VEHICLE[themeId] || !Art.src(item)) return;
+    var car = el('div', 'driveby', Art.html(item, { eager: true }) + '<span class="puff">💨</span>');
+    fx.appendChild(car);
+    vehicleSound(themeId, item);
+    setTimeout(function () { car.remove(); }, 2300);
+  }
+
   /* 맞췄을 때 — 그림과 단어를 화면 가득 크게 보여주고 또박또박 읽어준다 */
-  function celebrate(item, isNew, done) {
+  function celebrate(item, isNew, done, themeId) {
     if (typeof isNew === 'function') { done = isNew; isNew = false; }
     Sound.chime();
     confetti();
+    if (themeId) setTimeout(function () { driveBy(item, themeId); }, 900);
     banner.innerHTML =
       '<div class="banner-art">' + Art.html(item) +
       (isNew ? '<span class="new-sticker">새 스티커!</span>' : '') + '</div>' +
@@ -317,13 +336,17 @@
           } else {
             next();
           }
-        });
+        }, theme.id);
       },
       lose: function (node) {
         nope(node);
         Level.lose(game, theme.id);
       },
       next: function () { next(); },
+      /* 두 번 틀리면 정답을 살짝 반짝여 준다 — 포기하기 전에 길을 보여준다 */
+      hint: function (node) { if (node) node.classList.add('hint'); },
+      vehicle: !!VEHICLE[theme.id],
+      vehicleSound: function (item) { vehicleSound(theme.id, item); },
       el: el, tile: tile, gridCols: gridCols, grid: makeGrid, shuffle: shuffle, pick: pick, one: one,
       confetti: confetti, say: say, spoken: spoken
     };

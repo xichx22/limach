@@ -14,6 +14,7 @@ Engine.register({
     var items = ctx.pick(ctx.theme.items, n);
     var target = ctx.one(items);
     var answered = false;
+    var misses = 0;
 
     ctx.ask('어디 있어?', target.name);
 
@@ -37,6 +38,7 @@ Engine.register({
           ctx.win(it);
         } else {
           ctx.lose(t);
+          if (++misses >= 2) ctx.hint(grid.querySelector('[data-id="' + target.id + '"]'));
           setTimeout(function () { ctx.say(said + ' 찾아봐'); }, 620);
         }
       });
