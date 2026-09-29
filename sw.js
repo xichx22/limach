@@ -1,7 +1,7 @@
 /* 오프라인 실행 + 새 버전 바로 받기.
    코드는 인터넷을 먼저 보고(새 버전이 있으면 바로 반영), 사진은 저장해둔 걸 먼저 쓴다.
    전부 저장해둔 걸 먼저 쓰면 앱을 고쳐도 폰에 옛날 화면이 계속 남는다. */
-var CACHE = 'jihan-play-v17';
+var CACHE = 'jihan-play-v19';
 var SHELL = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ var SHELL = [
   './js/data.js',
   './js/drag.js',
   './js/engine.js',
+  './js/hangul.js',
   './js/level.js',
   './js/lineart.js',
   './js/mine.js',
@@ -27,6 +28,7 @@ var SHELL = [
   './js/games/listen.js',
   './js/games/maze.js',
   './js/games/memory.js',
+  './js/games/nametag.js',
   './js/games/oddone.js',
   './js/games/pattern.js',
   './js/games/puzzle.js',
@@ -35,6 +37,7 @@ var SHELL = [
   './js/games/signal.js',
   './js/games/voice.js',
   './js/games/wash.js',
+  './js/games/wordtrain.js',
   './icon-192.png',
   './icon-512.png'
 ];

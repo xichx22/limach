@@ -896,3 +896,70 @@ button{ font: inherit; color: inherit; border: none; background: none; cursor: p
 }
 .mem-card.open .mem-back{ opacity:0; pointer-events:none; }
 .mem-card.done{ box-shadow: 0 0 0 4px #48c774 inset, 0 5px 0 rgba(0,0,0,.09); }
+
+/* ---------- 🏷️ 이름표 붙이기 ---------- */
+.nt-photo{
+  position:relative; width: min(72vw, 46vh, 360px); aspect-ratio:1/1;
+  border-radius:26px; overflow:visible;
+}
+.nt-photo .art-photo img{ border-radius:26px; box-shadow:0 10px 24px rgba(0,0,0,.18); aspect-ratio:1/1; }
+.nt-photo .art-emoji{ font-size: min(40vw, 180px); }
+.nt-slot{
+  position:absolute; left:50%; bottom:-22px; transform: translateX(-50%);
+  min-width:60%; padding:8px 18px; border-radius:16px; text-align:center;
+  background:#fff; border:4px dashed #e0b58a; color:#e0b58a;
+  font-size: clamp(26px, 7vw, 42px); white-space:nowrap;
+}
+.nt-slot.on{ border:4px solid #3fa85a; color:#cc3d1f; animation: snap .3s ease; }
+.nt-cards{ display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:34px; width:100%; }
+.nt-card{
+  flex: 1 1 40%; max-width: 46%; padding: 18px 8px; border-radius:20px;
+  background:#fff; color:#3b2a1f; font-size: clamp(30px, 9vw, 52px); letter-spacing:.04em;
+  box-shadow: 0 6px 0 #e3cdb5, 0 10px 18px rgba(0,0,0,.08);
+  word-break: keep-all;
+}
+.nt-card.long{ font-size: clamp(22px, 6.5vw, 40px); }
+.nt-card:active{ transform: translateY(4px); box-shadow: 0 2px 0 #e3cdb5; }
+.nt-card.fly{ opacity:0; transform: translateY(-120px) scale(.6); transition: all .5s ease; }
+.nt-card.hint{ animation: hint 1s ease-in-out infinite; box-shadow: 0 0 0 5px #ffd23f, 0 6px 0 #e3cdb5; }
+
+/* ---------- 🚂 글자 기차 ---------- */
+.wt-rail{
+  width:100%; overflow:hidden; padding: 10px 0 18px;
+  background: linear-gradient(transparent calc(100% - 14px), #8a6a4a calc(100% - 14px), #8a6a4a calc(100% - 10px), transparent calc(100% - 10px));
+}
+.wt-train{ display:flex; align-items:flex-end; justify-content:center; gap:6px; }
+.wt-train.go{ animation: train-go 1.7s ease-in forwards; }
+@keyframes train-go{ 15%{ transform: translateX(-12px); } 100%{ transform: translateX(-130vw); } }
+.wt-engine{ width: min(24vw, 120px); flex:0 0 auto; }
+.wt-engine .art-photo img{ border-radius:18px 40px 10px 10px; aspect-ratio:1/1; border:4px solid #4f46e5; }
+.wt-car{
+  width: min(17vw, 92px); aspect-ratio: 1/1.05; flex:0 0 auto;
+  border-radius:14px; background:#fff; border:4px solid #4f46e5;
+  display:grid; place-items:center; position:relative;
+  box-shadow: 0 6px 0 rgba(0,0,0,.12);
+}
+.wt-car::before, .wt-car::after{
+  content:''; position:absolute; bottom:-14px; width:18px; height:18px; border-radius:50%;
+  background:#333; border:3px solid #999;
+}
+.wt-car::before{ left:14%; } .wt-car::after{ right:14%; }
+.wt-ghost{ font-size: min(11vw, 58px); color:#e6e2ff; }
+.wt-letter{ font-size: min(11vw, 58px); color:#cc3d1f; }
+.wt-car.in{ background:#fff7d6; animation: snap .3s ease; }
+.wt-car.next{ animation: hint .8s ease-in-out 2; box-shadow: 0 0 0 5px #ffd23f, 0 6px 0 rgba(0,0,0,.12); }
+.wt-tray{ display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:18px; }
+.wt-block{
+  width: min(21vw, 104px); aspect-ratio:1/1; border-radius:18px;
+  background: linear-gradient(160deg, #ffe07a, #ffb23f); color:#5a3a10;
+  font-size: min(12vw, 62px); box-shadow: 0 7px 0 #d68a1f, 0 10px 16px rgba(0,0,0,.12);
+}
+.wt-block:active{ transform: translateY(5px); box-shadow: 0 2px 0 #d68a1f; }
+.wt-block.used{ visibility:hidden; }
+
+/* ---------- 🔤 도감: 내가 아는 글자 ---------- */
+.album-letters{ display:flex; flex-wrap:wrap; gap:8px; padding: 4px 2px 12px; }
+.album-letter{
+  width:58px; height:58px; border-radius:14px; background:#fff; font-size:32px; color:#cc3d1f;
+  box-shadow: 0 4px 0 #e3cdb5;
+}

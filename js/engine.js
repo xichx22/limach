@@ -375,6 +375,24 @@
     app.appendChild(head);
 
     var wrap = el('div', 'album');
+
+    /* 🔤 내가 아는 글자 — 이름표·글자 기차에서 맞힌 글자들. 누르면 읽어준다 */
+    var letters = Hangul.known();
+    if (letters.length) {
+      var lh = el('div', 'album-head',
+        '<span class="album-icon">🔤</span><span class="album-name">내가 아는 글자</span>' +
+        '<span class="album-count">' + letters.length + '자</span>');
+      wrap.appendChild(lh);
+      var lg = el('div', 'album-letters');
+      letters.forEach(function (s) {
+        var b = el('button', 'album-letter', s);
+        b.type = 'button';
+        b.addEventListener('click', function () { Sound.pop(); Sound.speak(s); });
+        lg.appendChild(b);
+      });
+      wrap.appendChild(lg);
+    }
+
     Data.themes().forEach(function (t) {
       var items = Data.usable(t);
       if (!items.length) return;
