@@ -325,6 +325,7 @@
       level: function () { return Level.get(game.id, theme.id); },
       win: function (item) {
         var r = Level.win(game, theme.id);
+        if (window.Progress) Progress.later();     // 배움 앱으로 진도 보내기
         /* 주제에 실제로 들어있는 것만 도감에 모은다 (개수·장소 같은 건 제외) */
         var real = playable.items.some(function (i) { return i.id === item.id; });
         var isNew = real ? Collect.add(theme.id, item.id) : false;
@@ -711,7 +712,10 @@
       Sound.pop();
       splash.classList.add('hide');
       setTimeout(function () { splash.remove(); }, 400);
-      Mine.load().then(function () { Mine.ensureScores(); home(); }, home);
+      Mine.load().then(function () {
+        Mine.ensureScores(); home();
+        if (window.Progress) Progress.later();   // 열 때 한 번 — 그동안 쌓인 진도를 배움 앱으로
+      }, home);
       if (!Sound.canSpeakKorean()) {
         setTimeout(function () {
           var w = el('div', 'novoice', '🔇 이 기기에 한국어 음성이 없어요.<br>글자로만 나와요.');
